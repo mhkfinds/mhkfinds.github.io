@@ -163,4 +163,3 @@ window.addEventListener('scroll', () => {
 console.log('%c🎉 Welcome to MHKfinds! 🎉', 'font-size: 20px; color: #512888; font-weight: bold;');
 console.log('%cManhattan\'s #1 Student Deal Hub', 'font-size: 14px; color: #FFD700;');
 console.log('%cFollow @mhkfinds on Instagram for daily deals!', 'font-size: 12px; color: #666;');
-
