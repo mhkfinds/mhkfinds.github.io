@@ -53,7 +53,11 @@ function parseCSV(csvText) {
             business: values[2]?.trim() || '',
             location: values[3]?.trim() || '',
             details: values[4]?.trim() || '',
-            category: (values[5]?.trim() || 'other').toLowerCase()
+            category: (values[5]?.trim() || 'other').toLowerCase(),
+            address: values[6]?.trim() || '', // Full address for Google Maps
+            hours: values[7]?.trim() || '',    // Business hours
+            phone: values[8]?.trim() || '',    // Phone number
+            website: values[9]?.trim() || ''   // Website/Instagram link
         });
     }
     
@@ -85,6 +89,13 @@ function renderDeals(sectionId, deals) {
 function createDealCard(deal) {
     const card = document.createElement('div');
     card.className = 'card';
+    card.style.cursor = 'pointer'; // Show it's clickable
+    
+    // Store deal data for modal
+    card.dataset.dealData = JSON.stringify(deal);
+    
+    // Add click handler
+    card.addEventListener('click', () => openDealModal(deal));
     
     // Build the card HTML
     let html = '';
@@ -167,3 +178,102 @@ window.addEventListener('scroll', () => {
 console.log('%c🎉 Welcome to MHKfinds! 🎉', 'font-size: 20px; color: #512888; font-weight: bold;');
 console.log('%cManhattan\'s #1 Student Deal Hub', 'font-size: 14px; color: #FFD700;');
 console.log('%cFollow @mhkfinds on Instagram for daily deals!', 'font-size: 12px; color: #666;');
+
+// ========== MODAL FUNCTIONALITY ==========
+
+function openDealModal(deal) {
+    const modal = document.getElementById('dealModal');
+    
+    // Populate modal with deal data
+    document.getElementById('modalIcon').textContent = deal.icon || '🎁';
+    document.getElementById('modalDealName').textContent = deal.deal || 'Deal';
+    document.getElementById('modalBusiness').textContent = deal.business || 'Business';
+    document.getElementById('modalLocation').textContent = deal.location || 'N/A';
+    
+    // Show/hide optional fields
+    const detailsRow = document.getElementById('modalDetailsRow');
+    const addressRow = document.getElementById('modalAddressRow');
+    const hoursRow = document.getElementById('modalHoursRow');
+    const phoneRow = document.getElementById('modalPhoneRow');
+    
+    if (deal.details) {
+        document.getElementById('modalDetails').textContent = deal.details;
+        detailsRow.style.display = 'block';
+    } else {
+        detailsRow.style.display = 'none';
+    }
+    
+    if (deal.address) {
+        document.getElementById('modalAddress').textContent = deal.address;
+        addressRow.style.display = 'block';
+    } else {
+        addressRow.style.display = 'none';
+    }
+    
+    if (deal.hours) {
+        document.getElementById('modalHours').textContent = deal.hours;
+        hoursRow.style.display = 'block';
+    } else {
+        hoursRow.style.display = 'none';
+    }
+    
+    if (deal.phone) {
+        document.getElementById('modalPhone').textContent = deal.phone;
+        phoneRow.style.display = 'block';
+    } else {
+        phoneRow.style.display = 'none';
+    }
+    
+    // Set up buttons
+    const directionsBtn = document.getElementById('modalDirectionsBtn');
+    const websiteBtn = document.getElementById('modalWebsiteBtn');
+    
+    // Google Maps directions link
+    if (deal.address || deal.business) {
+        const searchQuery = encodeURIComponent(deal.address || `${deal.business} ${deal.location} Manhattan KS`);
+        directionsBtn.href = `https://www.google.com/maps/search/?api=1&query=${searchQuery}`;
+        directionsBtn.style.display = 'flex';
+    } else {
+        directionsBtn.style.display = 'none';
+    }
+    
+    // Website/Instagram link
+    if (deal.website) {
+        // Add https:// if not present
+        let url = deal.website;
+        if (!url.startsWith('http')) {
+            url = 'https://' + url;
+        }
+        websiteBtn.href = url;
+        websiteBtn.style.display = 'flex';
+    } else {
+        websiteBtn.style.display = 'none';
+    }
+    
+    // Show modal
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+function closeDealModal() {
+    const modal = document.getElementById('dealModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = ''; // Restore scrolling
+}
+
+// Close modal when clicking X
+document.querySelector('.modal-close').addEventListener('click', closeDealModal);
+
+// Close modal when clicking outside
+document.getElementById('dealModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDealModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeDealModal();
+    }
+});
