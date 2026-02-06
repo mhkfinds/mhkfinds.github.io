@@ -16,11 +16,13 @@ async function loadDeals() {
         
         // Separate deals by category
         const todayDeals = deals.filter(deal => deal.category === 'today');
+        const drinkDeals = deals.filter(deal => deal.category === 'drinks');
         const otherDeals = deals.filter(deal => deal.category === 'other');
         const events = deals.filter(deal => deal.category === 'event');
         
         // Render deals to the page
         renderDeals('today', todayDeals);
+        renderDeals('drinks', drinkDeals);
         renderDeals('deals', otherDeals);
         renderDeals('events', events);
         
