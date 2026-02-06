@@ -37,25 +37,25 @@ function parseCSV(csvText) {
     
     // Skip header row (line 0), start from line 1
     for (let i = 1; i < lines.length; i++) {
-        const line = lines[i];
-        if (!line.trim()) continue; // Skip empty lines
+        const line = lines[i].trim();
+        if (!line) continue; // Skip empty lines
         
-        // Split by comma, but respect quotes
-        const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
-        const values = line.split(regex).map(v => v.replace(/^"|"$/g, '').trim());
+        // Simple CSV split by comma
+        const values = line.split(',');
         
         if (values.length < 3) continue; // Skip invalid rows
         
         deals.push({
-            icon: values[0] || '🎁',
-            deal: values[1] || '',
-            business: values[2] || '',
-            location: values[3] || '',
-            details: values[4] || '',
-            category: (values[5] || 'other').toLowerCase()
+            icon: values[0]?.trim() || '🎁',
+            deal: values[1]?.trim() || '',
+            business: values[2]?.trim() || '',
+            location: values[3]?.trim() || '',
+            details: values[4]?.trim() || '',
+            category: (values[5]?.trim() || 'other').toLowerCase()
         });
     }
     
+    console.log('Loaded deals:', deals); // Debug log
     return deals;
 }
 
