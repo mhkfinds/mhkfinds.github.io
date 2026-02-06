@@ -1,0 +1,538 @@
+/* ================================================
+   MHKFINDS - STYLESHEET
+   Manhattan's #1 Student Deal Hub
+   ================================================ */
+
+/* ========== RESET & BASE STYLES ========== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f6f6f6;
+    color: #222;
+    line-height: 1.6;
+}
+
+/* ========== NAVIGATION ========== */
+.navbar {
+    background: linear-gradient(135deg, #512888 0%, #3a1f63 100%);
+    color: white;
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(81, 40, 136, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+.navbar::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: pulse 15s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1); 
+        opacity: 0.3; 
+    }
+    50% { 
+        transform: scale(1.1); 
+        opacity: 0.5; 
+    }
+}
+
+.nav-logo {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    letter-spacing: -1px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.logo-main {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo-main::before {
+    content: '💜';
+    font-size: 2rem;
+    animation: pulse-heart 2s ease-in-out infinite;
+}
+
+@keyframes pulse-heart {
+    0%, 100% { 
+        transform: scale(1); 
+    }
+    50% { 
+        transform: scale(1.2); 
+    }
+}
+
+.logo-tagline {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.85;
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-top: 0.15rem;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.85rem 1.75rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-links a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.nav-links a:hover::before {
+    left: 100%;
+}
+
+.nav-links a:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* ========== GIVEAWAY BANNER ========== */
+.giveaway {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B6B 100%);
+    color: #2d1b4e;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+    scroll-margin-top: 150px; /* Offset for sticky navbar */
+}
+
+.giveaway::before {
+    content: '🎉';
+    position: absolute;
+    font-size: 15rem;
+    opacity: 0.1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+}
+
+.giveaway h1 {
+    font-size: 3rem;
+    margin: 0 0 1rem 0;
+    font-weight: 900;
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { 
+        transform: translateY(0); 
+    }
+    50% { 
+        transform: translateY(-10px); 
+    }
+}
+
+.giveaway p {
+    font-size: 1.3rem;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+/* ========== SECTIONS ========== */
+.section {
+    padding: 4rem 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    scroll-margin-top: 150px; /* Offset for sticky navbar */
+}
+
+.section.alt {
+    background: linear-gradient(180deg, #ffffff 0%, #f9f9f9 100%);
+}
+
+.section h2 {
+    font-size: 2.5rem;
+    margin: 0 0 2rem 0;
+    color: #512888;
+    font-weight: 900;
+    text-align: center;
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.section h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #FFD700, #FFA500);
+    border-radius: 2px;
+}
+
+.section-subtitle {
+    text-align: center;
+    font-size: 1.1rem;
+    color: #666;
+    margin-top: -1rem;
+}
+
+/* ========== GRID & CARDS ========== */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+    margin-top: 2.5rem;
+}
+
+.card {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+    font-weight: 500;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 3px solid #f0f0f0;
+}
+
+/* Gradient border effect on hover */
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(81, 40, 136, 0.08) 0%, rgba(255, 215, 0, 0.08) 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+/* Top accent bar */
+.card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, #512888, #FFD700, #FFA500);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.card:hover::after {
+    transform: scaleX(1);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+.card:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow: 0 20px 50px rgba(81, 40, 136, 0.25);
+    border-color: #FFD700;
+}
+
+/* Deal icon/badge */
+.card-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    display: inline-block;
+    animation: float-icon 3s ease-in-out infinite;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+}
+
+@keyframes float-icon {
+    0%, 100% { 
+        transform: translateY(0px); 
+    }
+    50% { 
+        transform: translateY(-8px); 
+    }
+}
+
+.card:hover .card-icon {
+    transform: scale(1.15) rotate(5deg);
+    transition: transform 0.3s ease;
+}
+
+.card h3 {
+    color: #512888;
+    font-size: 1.6rem;
+    margin: 0.5rem 0 0.75rem 0;
+    font-weight: 800;
+    position: relative;
+    z-index: 1;
+    line-height: 1.3;
+}
+
+/* Add emphasis to deal amount */
+.card h3::first-line {
+    font-size: 1.8rem;
+}
+
+.card p {
+    color: #2d1b4e;
+    font-size: 1.15rem;
+    margin: 0.75rem 0;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+}
+
+.card small {
+    color: #666;
+    font-size: 0.95rem;
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.4rem 1rem;
+    background: rgba(81, 40, 136, 0.08);
+    border-radius: 20px;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+/* Sparkle effect for special deals */
+.card:nth-child(1)::before,
+.card:nth-child(3)::before,
+.card:nth-child(5)::before {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 165, 0, 0.12) 100%);
+}
+
+/* ========== STATS SECTION ========== */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    background: linear-gradient(135deg, #512888 0%, #2d1b4e 100%);
+    color: white;
+    padding: 4rem 2rem;
+    gap: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    top: -100px;
+    left: -100px;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { 
+        transform: translate(0, 0); 
+    }
+    50% { 
+        transform: translate(50px, 50px); 
+    }
+}
+
+.stat {
+    position: relative;
+    z-index: 1;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s;
+}
+
+.stat:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.stat h3 {
+    font-size: 4rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: 900;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat p {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* ========== FOOTER ========== */
+footer {
+    background: #1a0d2e;
+    color: white;
+    padding: 2.5rem 2rem;
+    text-align: center;
+}
+
+footer p {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+}
+
+.socials {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.socials a {
+    color: #FFD700;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.socials a:hover {
+    background: rgba(255, 215, 0, 0.2);
+    transform: translateY(-2px);
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 768px) {
+    /* Navigation */
+    .navbar {
+        padding: 1.5rem 1rem;
+    }
+
+    .nav-logo {
+        font-size: 2rem;
+    }
+    
+    .logo-main::before {
+        font-size: 1.5rem;
+    }
+    
+    .logo-tagline {
+        font-size: 0.6rem;
+        letter-spacing: 2px;
+    }
+
+    .nav-links a {
+        font-size: 0.9rem;
+        padding: 0.7rem 1.2rem;
+    }
+
+    /* Giveaway */
+    .giveaway h1 {
+        font-size: 2rem;
+    }
+
+    .giveaway p {
+        font-size: 1.1rem;
+    }
+
+    /* Sections */
+    .section {
+        padding: 3rem 1rem;
+    }
+
+    .section h2 {
+        font-size: 2rem;
+    }
+
+    /* Grid */
+    .grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Stats */
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .stat h3 {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .giveaway h1 {
+        font-size: 1.75rem;
+    }
+
+    .section h2 {
+        font-size: 1.75rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+}
