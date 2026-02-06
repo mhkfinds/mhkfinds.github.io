@@ -40,17 +40,19 @@ function parseCSV(csvText) {
         const line = lines[i];
         if (!line.trim()) continue; // Skip empty lines
         
-        // Parse CSV line (handles commas in quotes)
-        const values = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
-        const cleanValues = values.map(v => v.replace(/^"|"$/g, '').trim());
+        // Split by comma, but respect quotes
+        const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+        const values = line.split(regex).map(v => v.replace(/^"|"$/g, '').trim());
+        
+        if (values.length < 3) continue; // Skip invalid rows
         
         deals.push({
-            icon: cleanValues[0] || '🎁',
-            deal: cleanValues[1] || '',
-            business: cleanValues[2] || '',
-            location: cleanValues[3] || '',
-            details: cleanValues[4] || '',
-            category: cleanValues[5] || 'other'
+            icon: values[0] || '🎁',
+            deal: values[1] || '',
+            business: values[2] || '',
+            location: values[3] || '',
+            details: values[4] || '',
+            category: (values[5] || 'other').toLowerCase()
         });
     }
     
