@@ -5,7 +5,7 @@
 
 // ========== GOOGLE SHEETS CONFIGURATION ==========
 // Replace this URL with YOUR published Google Sheets CSV URL
-const GOOGLE_SHEET_URL = 'YOUR_GOOGLE_SHEET_CSV_URL_HERE';
+const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT3QxDHqv4FuFfW2ygOAAPGco5WW-OJzAKYbdIQQ8lHguKr4e8yLnf7rNqHafiljTuW8h6-9-AWOCht/pub?gid=0&single=true&output=csv';
 
 // ========== LOAD DEALS FROM GOOGLE SHEETS ==========
 async function loadDeals() {
@@ -163,3 +163,4 @@ window.addEventListener('scroll', () => {
 console.log('%c🎉 Welcome to MHKfinds! 🎉', 'font-size: 20px; color: #512888; font-weight: bold;');
 console.log('%cManhattan\'s #1 Student Deal Hub', 'font-size: 14px; color: #FFD700;');
 console.log('%cFollow @mhkfinds on Instagram for daily deals!', 'font-size: 12px; color: #666;');
+
