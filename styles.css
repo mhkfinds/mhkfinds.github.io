@@ -191,6 +191,50 @@ body {
     font-weight: 600;
     position: relative;
     z-index: 1;
+    margin-bottom: 2rem;
+}
+
+.giveaway-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.giveaway-btn {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: 3px solid transparent;
+}
+
+.giveaway-btn.instagram {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    color: white;
+}
+
+.giveaway-btn.instagram:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(188, 24, 136, 0.4);
+    border-color: white;
+}
+
+.giveaway-btn.facebook {
+    background: #1877f2;
+    color: white;
+}
+
+.giveaway-btn.facebook:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(24, 119, 242, 0.4);
+    border-color: white;
 }
 
 /* ========== SECTIONS ========== */
@@ -496,6 +540,11 @@ footer p {
 
     .giveaway p {
         font-size: 1.1rem;
+    }
+
+    .giveaway-btn {
+        padding: 0.85rem 2rem;
+        font-size: 1.05rem;
     }
 
     /* Sections */
