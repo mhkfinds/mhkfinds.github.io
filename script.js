@@ -18,7 +18,27 @@ async function loadDeals() {
         const todayDeals = deals.filter(deal => deal.category === 'today');
         const drinkDeals = deals.filter(deal => deal.category === 'drinks');
         const otherDeals = deals.filter(deal => deal.category === 'other');
-        const events = deals.filter(deal => deal.category === 'event');
+        let events = deals.filter(deal => deal.category === 'event');
+        
+        // Sort events: recurring first (no event date), then one-time by date
+        events = events.sort((a, b) => {
+            const hasDateA = a.eventDate && a.eventDate.length > 0;
+            const hasDateB = b.eventDate && b.eventDate.length > 0;
+            
+            // Both recurring (no dates) - maintain original order
+            if (!hasDateA && !hasDateB) return 0;
+            
+            // A is recurring, B is one-time - A comes first
+            if (!hasDateA && hasDateB) return -1;
+            
+            // A is one-time, B is recurring - B comes first
+            if (hasDateA && !hasDateB) return 1;
+            
+            // Both have dates - sort chronologically
+            const dateA = new Date(a.eventDate);
+            const dateB = new Date(b.eventDate);
+            return dateA - dateB;
+        });
         
         // Render deals to the page
         renderDeals('today', todayDeals);
@@ -56,6 +76,7 @@ function parseCSV(csvText) {
         
         const expiresStr = values[6]?.trim() || '';
         const showOnStr = values[7]?.trim().toLowerCase() || '';
+        const eventDateStr = values[8]?.trim() || ''; // New: Event Date column
         
         // Check if deal is expired
         if (expiresStr) {
@@ -70,16 +91,21 @@ function parseCSV(csvText) {
         if (showOnStr) {
             let shouldShow = false;
             
+            console.log(`Checking deal: "${values[1]}" | Show On: "${showOnStr}" | Current Day: "${currentDay.toLowerCase()}"`);
+            
             if (showOnStr === 'weekend' && isWeekend) {
                 shouldShow = true;
+                console.log(`  ✓ Weekend deal and today is weekend`);
             } else if (showOnStr === 'weekday' && isWeekday) {
                 shouldShow = true;
+                console.log(`  ✓ Weekday deal and today is weekday`);
             } else if (showOnStr === currentDay.toLowerCase()) {
                 shouldShow = true;
+                console.log(`  ✓ Day matches!`);
             }
             
             if (!shouldShow) {
-                console.log(`Deal not showing today: ${values[1]} (shows on ${showOnStr}, today is ${currentDay})`);
+                console.log(`  ✗ Skipping: Deal shows on "${showOnStr}", but today is "${currentDay}"`);
                 continue; // Skip deals not for today
             }
         }
@@ -92,7 +118,8 @@ function parseCSV(csvText) {
             details: values[4]?.trim() || '',
             category: (values[5]?.trim() || 'other').toLowerCase(),
             expires: expiresStr,
-            showOn: showOnStr
+            showOn: showOnStr,
+            eventDate: eventDateStr
         });
     }
     
@@ -152,9 +179,18 @@ function createDealCard(deal) {
     }
     
     // Add location or details
-    const smallText = deal.details || deal.location;
+    let smallText = deal.details || deal.location;
+    
+    // For events, add date if available
+    if (deal.category === 'event' && deal.eventDate) {
+        const eventDate = new Date(deal.eventDate);
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        const formattedDate = eventDate.toLocaleDateString('en-US', options);
+        smallText = `📅 ${formattedDate}` + (smallText ? ` • ${smallText}` : '');
+    }
+    
     if (smallText) {
-        const prefix = deal.location && !deal.details ? '📍 ' : '';
+        const prefix = deal.location && !deal.details && deal.category !== 'event' ? '📍 ' : '';
         html += `<small>${prefix}${smallText}</small>`;
     }
     
