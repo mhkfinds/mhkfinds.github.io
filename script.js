@@ -74,6 +74,13 @@ function parseCSV(csvText) {
         
         if (values.length < 3) continue; // Skip invalid rows
         
+        // Skip rows with no deal name (empty rows)
+        const dealName = values[1]?.trim();
+        if (!dealName) {
+            console.log(`Skipping row ${i}: No deal name`);
+            continue;
+        }
+        
         const expiresStr = values[6]?.trim() || '';
         const showOnStr = values[7]?.trim().toLowerCase() || '';
         const eventDateStr = values[8]?.trim() || ''; // New: Event Date column
@@ -136,10 +143,15 @@ function renderDeals(sectionId, deals) {
     const grid = section.querySelector('.grid');
     if (!grid) return;
     
-    // Clear existing deals (except if no deals loaded, keep defaults)
-    if (deals.length > 0) {
-        grid.innerHTML = '';
+    // If no deals, hide the entire section
+    if (deals.length === 0) {
+        section.style.display = 'none';
+        return;
     }
+    
+    // Show section and clear existing deals
+    section.style.display = 'block';
+    grid.innerHTML = '';
     
     // Add each deal as a card
     deals.forEach(deal => {
