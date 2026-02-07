@@ -36,6 +36,13 @@ async function loadDeals() {
 function parseCSV(csvText) {
     const lines = csvText.trim().split('\n');
     const deals = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
+    
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const currentDay = daysOfWeek[today.getDay()];
+    const isWeekend = (today.getDay() === 0 || today.getDay() === 6); // Sunday or Saturday
+    const isWeekday = !isWeekend;
     
     // Skip header row (line 0), start from line 1
     for (let i = 1; i < lines.length; i++) {
@@ -47,17 +54,50 @@ function parseCSV(csvText) {
         
         if (values.length < 3) continue; // Skip invalid rows
         
+        const expiresStr = values[6]?.trim() || '';
+        const showOnStr = values[7]?.trim().toLowerCase() || '';
+        
+        // Check if deal is expired
+        if (expiresStr) {
+            const expiresDate = new Date(expiresStr);
+            if (expiresDate < today) {
+                console.log(`Deal expired: ${values[1]} (expired ${expiresStr})`);
+                continue; // Skip expired deals
+            }
+        }
+        
+        // Check if deal should show today
+        if (showOnStr) {
+            let shouldShow = false;
+            
+            if (showOnStr === 'weekend' && isWeekend) {
+                shouldShow = true;
+            } else if (showOnStr === 'weekday' && isWeekday) {
+                shouldShow = true;
+            } else if (showOnStr === currentDay.toLowerCase()) {
+                shouldShow = true;
+            }
+            
+            if (!shouldShow) {
+                console.log(`Deal not showing today: ${values[1]} (shows on ${showOnStr}, today is ${currentDay})`);
+                continue; // Skip deals not for today
+            }
+        }
+        
         deals.push({
             icon: values[0]?.trim() || '🎁',
             deal: values[1]?.trim() || '',
             business: values[2]?.trim() || '',
             location: values[3]?.trim() || '',
             details: values[4]?.trim() || '',
-            category: (values[5]?.trim() || 'other').toLowerCase()
+            category: (values[5]?.trim() || 'other').toLowerCase(),
+            expires: expiresStr,
+            showOn: showOnStr
         });
     }
     
-    console.log('Loaded deals:', deals); // Debug log
+    console.log(`Today is ${currentDay}. Loaded ${deals.length} active deals.`);
+    console.log('Active deals:', deals);
     return deals;
 }
 
