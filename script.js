@@ -15,10 +15,15 @@ async function loadDeals() {
         const deals = parseCSV(csvText);
         
         // Separate deals by category
-        const todayDeals = deals.filter(deal => deal.category === 'today');
+        let todayDeals = deals.filter(deal => deal.category === 'today');
         const drinkDeals = deals.filter(deal => deal.category === 'drinks');
         const otherDeals = deals.filter(deal => deal.category === 'other');
         let events = deals.filter(deal => deal.category === 'event');
+        
+        // Sort Today's Deals: Featured first, then randomize the rest
+        const featuredToday = todayDeals.filter(deal => deal.featured);
+        const regularToday = todayDeals.filter(deal => !deal.featured);
+        todayDeals = [...featuredToday, ...shuffleArray(regularToday)];
         
         // Sort events: recurring first (no event date), then one-time by date
         events = events.sort((a, b) => {
@@ -52,6 +57,16 @@ async function loadDeals() {
     }
 }
 
+// Shuffle array randomly (Fisher-Yates algorithm)
+function shuffleArray(array) {
+    const shuffled = [...array]; // Create a copy
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 // Parse CSV text into array of deal objects
 function parseCSV(csvText) {
     const lines = csvText.trim().split('\n');
@@ -83,7 +98,8 @@ function parseCSV(csvText) {
         
         const expiresStr = values[6]?.trim() || '';
         const showOnStr = values[7]?.trim().toLowerCase() || '';
-        const eventDateStr = values[8]?.trim() || ''; // New: Event Date column
+        const eventDateStr = values[8]?.trim() || ''; // Event Date column
+        const featuredStr = values[9]?.trim().toLowerCase() || ''; // Featured column
         
         // Check if deal is expired
         if (expiresStr) {
@@ -126,7 +142,8 @@ function parseCSV(csvText) {
             category: (values[5]?.trim() || 'other').toLowerCase(),
             expires: expiresStr,
             showOn: showOnStr,
-            eventDate: eventDateStr
+            eventDate: eventDateStr,
+            featured: featuredStr === 'yes' || featuredStr === 'true' || featuredStr === '1'
         });
     }
     
@@ -164,6 +181,12 @@ function renderDeals(sectionId, deals) {
 function createDealCard(deal) {
     const card = document.createElement('div');
     card.className = 'card';
+    
+    // Add featured class if deal is featured
+    if (deal.featured) {
+        card.classList.add('featured');
+    }
+    
     card.style.cursor = 'pointer'; // Show it's clickable
     
     // Store deal data for modal
@@ -174,6 +197,11 @@ function createDealCard(deal) {
     
     // Build the card HTML
     let html = '';
+    
+    // Add featured badge if deal is featured
+    if (deal.featured) {
+        html += `<div class="featured-badge">⭐ Featured</div>`;
+    }
     
     // Add icon if exists
     if (deal.icon) {
