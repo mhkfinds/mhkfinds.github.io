@@ -518,11 +518,12 @@ footer p {
 @media (max-width: 768px) {
     /* Navigation */
     .navbar {
-        padding: 1.5rem 1rem;
+        padding: 1.5rem 1rem 1rem;
     }
 
     .nav-logo {
         font-size: 2rem;
+        margin-bottom: 0.75rem;
     }
     
     .logo-main::before {
@@ -534,9 +535,17 @@ footer p {
         letter-spacing: 2px;
     }
 
+    .nav-links {
+        gap: 0.5rem;
+        max-width: 100%;
+    }
+
     .nav-links a {
-        font-size: 0.9rem;
-        padding: 0.7rem 1.2rem;
+        font-size: 0.75rem;
+        padding: 0.5rem 0.9rem;
+        flex: 1 1 calc(33.33% - 0.5rem);
+        min-width: calc(33.33% - 0.5rem);
+        text-align: center;
     }
 
     /* Giveaway */
@@ -776,4 +785,54 @@ footer p {
     .modal-icon {
         font-size: 3rem;
     }
+}
+
+/* ========== FEATURED DEALS ========== */
+.card.featured {
+    border: 3px solid #FFD700;
+    background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%);
+    box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+}
+
+.card.featured::after {
+    background: linear-gradient(90deg, #FFD700, #FFA500, #FFD700);
+    transform: scaleX(1);
+    height: 8px;
+}
+
+.card.featured:hover {
+    box-shadow: 0 20px 60px rgba(255, 215, 0, 0.5);
+    transform: translateY(-15px) scale(1.05);
+}
+
+.featured-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #2d1b4e;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    z-index: 10;
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Featured card gets subtle glow */
+.card.featured::before {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.15) 100%);
+    opacity: 1;
 }
