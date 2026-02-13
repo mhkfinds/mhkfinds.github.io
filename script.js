@@ -16,7 +16,7 @@ async function loadDeals() {
         
         // Separate deals by category
         let todayDeals = deals.filter(deal => deal.category === 'today');
-        const drinkDeals = deals.filter(deal => deal.category === 'drinks');
+        let drinkDeals = deals.filter(deal => deal.category === 'drinks');
         const otherDeals = deals.filter(deal => deal.category === 'other');
         let events = deals.filter(deal => deal.category === 'event');
         
@@ -24,6 +24,11 @@ async function loadDeals() {
         const featuredToday = todayDeals.filter(deal => deal.featured);
         const regularToday = todayDeals.filter(deal => !deal.featured);
         todayDeals = [...featuredToday, ...shuffleArray(regularToday)];
+        
+        // Sort Drink Deals: Featured first, then randomize the rest
+        const featuredDrinks = drinkDeals.filter(deal => deal.featured);
+        const regularDrinks = drinkDeals.filter(deal => !deal.featured);
+        drinkDeals = [...featuredDrinks, ...shuffleArray(regularDrinks)];
         
         // Sort events: recurring first (no event date), then one-time by date
         events = events.sort((a, b) => {
@@ -50,6 +55,9 @@ async function loadDeals() {
         renderDeals('drinks', drinkDeals);
         renderDeals('deals', otherDeals);
         renderDeals('events', events);
+        
+        // Render weekly calendar
+        renderWeeklyCalendar(deals);
         
     } catch (error) {
         console.error('Error loading deals:', error);
@@ -341,3 +349,79 @@ document.addEventListener('keydown', function(e) {
         closeDealModal();
     }
 });
+
+
+// ========== WEEKLY CALENDAR FUNCTIONALITY ==========
+
+function renderWeeklyCalendar(deals) {
+    const calendarGrid = document.querySelector('.calendar-grid');
+    if (!calendarGrid) return;
+    
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const dayEmojis = {
+        'Monday': '📅',
+        'Tuesday': '🌮',
+        'Wednesday': '🍷',
+        'Thursday': '🍺',
+        'Friday': '🍕',
+        'Saturday': '🎉',
+        'Sunday': '☀️'
+    };
+    
+    calendarGrid.innerHTML = '';
+    
+    days.forEach(day => {
+        const dayLower = day.toLowerCase();
+        
+        // Count deals for this day
+        const dayDeals = deals.filter(deal => {
+            if (!deal.showOn) return true; // Every day deals count for all days
+            if (deal.showOn === dayLower) return true;
+            if (deal.showOn === 'weekday' && ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].includes(dayLower)) return true;
+            if (deal.showOn === 'weekend' && ['saturday', 'sunday'].includes(dayLower)) return true;
+            return false;
+        });
+        
+        const dealCount = dayDeals.length;
+        
+        // Get top 3 deals for preview
+        const topDeals = dayDeals.slice(0, 3);
+        
+        // Create card
+        const card = document.createElement('div');
+        card.className = 'calendar-day-card';
+        
+        // Highlight today
+        const today = new Date();
+        const todayDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][today.getDay()];
+        if (day === todayDay) {
+            card.classList.add('today');
+        }
+        
+        let html = `
+            <div class="calendar-day-header">
+                <span class="calendar-day-emoji">${dayEmojis[day]}</span>
+                <h3>${day}</h3>
+                <span class="calendar-day-count">${dealCount} deal${dealCount !== 1 ? 's' : ''}</span>
+            </div>
+            <div class="calendar-day-preview">
+        `;
+        
+        if (topDeals.length > 0) {
+            topDeals.forEach(deal => {
+                html += `<div class="calendar-deal-preview">${deal.icon} ${deal.deal}</div>`;
+            });
+            
+            if (dayDeals.length > 3) {
+                html += `<div class="calendar-more">+${dayDeals.length - 3} more</div>`;
+            }
+        } else {
+            html += `<div class="calendar-no-deals">No exclusive deals</div>`;
+        }
+        
+        html += `</div>`;
+        
+        card.innerHTML = html;
+        calendarGrid.appendChild(card);
+    });
+}
