@@ -44,9 +44,11 @@ async function loadDeals() {
             // A is one-time, B is recurring - B comes first
             if (hasDateA && !hasDateB) return 1;
             
-            // Both have dates - sort chronologically
-            const dateA = new Date(a.eventDate);
-            const dateB = new Date(b.eventDate);
+            // Both have dates - sort chronologically (FIXED: parse in local timezone)
+            const [yearA, monthA, dayA] = a.eventDate.split('-').map(Number);
+            const [yearB, monthB, dayB] = b.eventDate.split('-').map(Number);
+            const dateA = new Date(yearA, monthA - 1, dayA);
+            const dateB = new Date(yearB, monthB - 1, dayB);
             return dateA - dateB;
         });
         
@@ -230,8 +232,12 @@ function createDealCard(deal) {
     let smallText = deal.details || deal.location;
     
     // For events, add date if available
+    // FIXED: Parse date in local timezone to avoid timezone offset issues
     if (deal.category === 'event' && deal.eventDate) {
-        const eventDate = new Date(deal.eventDate);
+        // Parse date components and create date in local timezone (not UTC)
+        const [year, month, day] = deal.eventDate.split('-').map(Number);
+        const eventDate = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
+        
         const options = { weekday: 'short', month: 'short', day: 'numeric' };
         const formattedDate = eventDate.toLocaleDateString('en-US', options);
         smallText = `📅 ${formattedDate}` + (smallText ? ` • ${smallText}` : '');
