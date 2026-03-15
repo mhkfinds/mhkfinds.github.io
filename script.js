@@ -638,7 +638,10 @@ function openDealModal(deal) {
     // Directions button
     const directionsBtn = document.getElementById('modalDirectionsBtn');
     if (deal.location || deal.business) {
-        directionsBtn.href = getDirectionsUrl(deal.location, deal.business);
+        directionsBtn.onclick = (e) => {
+            e.stopPropagation();
+            window.open(getDirectionsUrl(deal.location, deal.business), '_blank');
+        };
         directionsBtn.style.display = 'flex';
     } else {
         directionsBtn.style.display = 'none';
