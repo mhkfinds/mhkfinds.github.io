@@ -387,10 +387,31 @@ function applyFilters() {
 
 function initMobileNav() {
     const navItems = document.querySelectorAll('.mobile-nav-item');
+    const moreMenu = document.getElementById('moreMenu');
+    const moreOverlay = document.getElementById('moreOverlay');
+
+    function closeMoreMenu() {
+        moreMenu.classList.remove('open');
+        moreOverlay.classList.remove('open');
+    }
 
     navItems.forEach(item => {
         item.addEventListener('click', () => {
             const target = item.dataset.target;
+
+            if (target === 'more') {
+                const isOpen = moreMenu.classList.contains('open');
+                if (isOpen) {
+                    closeMoreMenu();
+                } else {
+                    moreMenu.classList.add('open');
+                    moreOverlay.classList.add('open');
+                    setMobileNavActive('more');
+                }
+                return;
+            }
+
+            closeMoreMenu();
 
             if (target === 'search') {
                 document.querySelector('.search-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -402,6 +423,17 @@ function initMobileNav() {
 
             setMobileNavActive(target);
         });
+    });
+
+    // Close menu when tapping the overlay
+    moreOverlay.addEventListener('click', closeMoreMenu);
+
+    // "Other Deals" item inside the more menu
+    moreMenu.querySelector('[data-target="deals"]').addEventListener('click', () => {
+        closeMoreMenu();
+        const section = document.getElementById('deals');
+        if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setMobileNavActive('more');
     });
 
     window.addEventListener('scroll', updateMobileNavOnScroll, { passive: true });
