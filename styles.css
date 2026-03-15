@@ -102,14 +102,13 @@ body {
 
 .nav-row {
     display: flex;
+    justify-content: center;
     align-items: flex-start;
-    gap: 1.5rem;
     position: relative;
     z-index: 1;
 }
 
 .nav-links {
-    flex: 1;
     display: flex;
     justify-content: center;
     gap: 1rem;
@@ -117,7 +116,9 @@ body {
 }
 
 .nav-search-group {
-    flex-shrink: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
     display: flex;
     flex-direction: column;
     align-items: flex-end;
