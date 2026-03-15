@@ -100,13 +100,28 @@ body {
     margin-top: 0.15rem;
 }
 
+.nav-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
 .nav-links {
+    flex: 1;
     display: flex;
     justify-content: center;
     gap: 1rem;
     flex-wrap: wrap;
-    position: relative;
-    z-index: 1;
+}
+
+.nav-search-group {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
 }
 
 .nav-links a {
@@ -307,8 +322,8 @@ body {
     box-shadow: 0 4px 20px rgba(81, 40, 136, 0.3);
 }
 
-/* Search wrapper sits inline with nav link pills */
-.nav-links .search-wrapper {
+/* Search wrapper in the nav-search-group */
+.nav-search-group .search-wrapper {
     display: flex;
     align-items: center;
     background: rgba(255, 255, 255, 0.15);
@@ -318,14 +333,32 @@ body {
     backdrop-filter: blur(10px);
     min-width: 200px;
     transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-    position: relative;
-    z-index: 1;
 }
 
-.nav-links .search-wrapper:focus-within {
+.nav-search-group .search-wrapper:focus-within {
     background: rgba(255, 255, 255, 0.22);
     border-color: #FFD700;
     box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+}
+
+/* Compact budget pills in navbar */
+.nav-search-group .price-filter-bar {
+    padding: 0;
+    justify-content: flex-end;
+    gap: 0.35rem;
+    background: none;
+    margin: 0;
+}
+
+.nav-search-group .price-filter-btn {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.65rem;
+}
+
+.nav-search-group .search-result-count {
+    margin: 0;
+    font-size: 0.8rem;
+    text-align: right;
 }
 
 .search-icon {
@@ -1049,20 +1082,12 @@ footer p {
         letter-spacing: 2px;
     }
 
-    .nav-links {
+    .nav-row {
         display: none;
     }
 
     .navbar {
         padding: 1rem 1.5rem;
-    }
-
-    .nav-links .search-wrapper {
-        display: none;
-    }
-
-    .search-section {
-        display: none;
     }
 
     /* Giveaway */
