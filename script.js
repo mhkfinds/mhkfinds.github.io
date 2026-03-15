@@ -605,65 +605,82 @@ window.addEventListener('scroll', () => {
 // Register service worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
-        .then(reg => {
-            console.log('Service Worker registered', reg.scope);
-        })
-        .catch(err => console.warn('Service Worker registration failed:', err));
+        .catch(err => console.warn('SW registration failed:', err));
 }
 
-// Install prompt (Android Chrome shows this automatically)
 let deferredInstallPrompt = null;
+const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
 
+// Capture Android install prompt
 window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredInstallPrompt = e;
-
-    // Don't show if already installed or previously dismissed
-    if (localStorage.getItem('pwaInstallDismissed')) return;
-
-    const banner = document.getElementById('installBanner');
-    if (banner) banner.style.display = 'flex';
 });
 
+// Hide banner after install
 window.addEventListener('appinstalled', () => {
     deferredInstallPrompt = null;
-    const banner = document.getElementById('installBanner');
-    if (banner) banner.style.display = 'none';
-    console.log('MHKfinds PWA installed');
+    hideBanner();
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const installBtn = document.getElementById('installBtn');
-    const installDismiss = document.getElementById('installDismiss');
+function hideBanner() {
+    const b = document.getElementById('installBanner');
+    if (b) b.style.display = 'none';
+}
 
-    if (installBtn) {
-        installBtn.addEventListener('click', async () => {
-            if (!deferredInstallPrompt) return;
+function showBanner() {
+    const b = document.getElementById('installBanner');
+    if (b) b.style.display = 'flex';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Don't show if already installed or user dismissed permanently
+    if (isStandalone || localStorage.getItem('pwaInstallDismissed')) return;
+
+    // Show the banner for everyone (iOS + Android)
+    showBanner();
+
+    // Install button click
+    document.getElementById('installBtn')?.addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+            // Android: trigger native prompt
             deferredInstallPrompt.prompt();
             const { outcome } = await deferredInstallPrompt.userChoice;
             deferredInstallPrompt = null;
-            document.getElementById('installBanner').style.display = 'none';
-        });
-    }
+            hideBanner();
+        } else if (isIOS) {
+            // iOS: show step-by-step tooltip
+            document.getElementById('iosTooltip').style.display = 'block';
+        } else {
+            // Desktop / other: open browser menu hint
+            alert('To install: open your browser menu and choose "Install app" or "Add to Home Screen".');
+        }
+    });
 
-    if (installDismiss) {
-        installDismiss.addEventListener('click', () => {
-            document.getElementById('installBanner').style.display = 'none';
-            localStorage.setItem('pwaInstallDismissed', '1');
-        });
-    }
+    // Dismiss banner
+    document.getElementById('installDismiss')?.addEventListener('click', () => {
+        hideBanner();
+        localStorage.setItem('pwaInstallDismissed', '1');
+    });
+
+    // Close iOS tooltip
+    document.getElementById('iosTooltipClose')?.addEventListener('click', () => {
+        document.getElementById('iosTooltip').style.display = 'none';
+    });
 });
 
 // Offline / online detection
-const offlineBanner = document.getElementById('offlineBanner');
-
 window.addEventListener('offline', () => {
-    if (offlineBanner) offlineBanner.style.display = 'block';
+    const b = document.getElementById('offlineBanner');
+    if (b) b.style.display = 'block';
 });
 
 window.addEventListener('online', () => {
-    if (offlineBanner) offlineBanner.style.display = 'none';
-    loadDeals(); // refresh deals when connection returns
+    const b = document.getElementById('offlineBanner');
+    if (b) b.style.display = 'none';
+    loadDeals();
 });
 
 // ========== CONSOLE WELCOME MESSAGE ==========
