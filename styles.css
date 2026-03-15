@@ -162,6 +162,83 @@ body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
+/* ========== OFFLINE BANNER ========== */
+.offline-banner {
+    background: #333;
+    color: white;
+    text-align: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 1002;
+}
+
+/* ========== INSTALL BANNER ========== */
+.install-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: linear-gradient(135deg, #2d1b4e, #512888);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    flex-wrap: wrap;
+}
+
+.install-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.install-btn {
+    background: #FFD700;
+    color: #2d1b4e;
+    border: none;
+    padding: 0.45rem 1.1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.install-btn:hover {
+    background: #FFC300;
+}
+
+.install-dismiss {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.install-dismiss:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 768px) {
+    .install-banner {
+        font-size: 0.82rem;
+        padding: 0.65rem 1rem;
+    }
+}
+
 /* ========== GIVEAWAY BANNER ========== */
 .giveaway-banner {
     background: linear-gradient(135deg, #FFD700 0%, #FFA500 60%, #FF6B35 100%);

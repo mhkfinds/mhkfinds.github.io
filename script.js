@@ -600,6 +600,72 @@ window.addEventListener('scroll', () => {
     });
 });
 
+// ========== PWA: SERVICE WORKER + INSTALL PROMPT ==========
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => {
+            console.log('Service Worker registered', reg.scope);
+        })
+        .catch(err => console.warn('Service Worker registration failed:', err));
+}
+
+// Install prompt (Android Chrome shows this automatically)
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+
+    // Don't show if already installed or previously dismissed
+    if (localStorage.getItem('pwaInstallDismissed')) return;
+
+    const banner = document.getElementById('installBanner');
+    if (banner) banner.style.display = 'flex';
+});
+
+window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    const banner = document.getElementById('installBanner');
+    if (banner) banner.style.display = 'none';
+    console.log('MHKfinds PWA installed');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const installBtn = document.getElementById('installBtn');
+    const installDismiss = document.getElementById('installDismiss');
+
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            document.getElementById('installBanner').style.display = 'none';
+        });
+    }
+
+    if (installDismiss) {
+        installDismiss.addEventListener('click', () => {
+            document.getElementById('installBanner').style.display = 'none';
+            localStorage.setItem('pwaInstallDismissed', '1');
+        });
+    }
+});
+
+// Offline / online detection
+const offlineBanner = document.getElementById('offlineBanner');
+
+window.addEventListener('offline', () => {
+    if (offlineBanner) offlineBanner.style.display = 'block';
+});
+
+window.addEventListener('online', () => {
+    if (offlineBanner) offlineBanner.style.display = 'none';
+    loadDeals(); // refresh deals when connection returns
+});
+
 // ========== CONSOLE WELCOME MESSAGE ==========
 console.log('%c🎉 Welcome to MHKfinds! 🎉', 'font-size: 20px; color: #512888; font-weight: bold;');
 console.log('%cManhattan\'s #1 Student Deal Hub', 'font-size: 14px; color: #FFD700;');
