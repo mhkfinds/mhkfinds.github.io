@@ -257,6 +257,7 @@ window.addEventListener('DOMContentLoaded', () => {
     loadDeals();
     initSearch();
     initPriceFilter();
+    initMobileNav();
 });
 
 // ========== SEARCH & PRICE FILTER ==========
@@ -380,6 +381,51 @@ function applyFilters() {
     } else {
         resultCount.style.display = 'none';
     }
+}
+
+// ========== MOBILE BOTTOM NAV ==========
+
+function initMobileNav() {
+    const navItems = document.querySelectorAll('.mobile-nav-item');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const target = item.dataset.target;
+
+            if (target === 'search') {
+                document.querySelector('.search-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => document.getElementById('searchInput').focus(), 400);
+            } else {
+                const section = document.getElementById(target);
+                if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            setMobileNavActive(target);
+        });
+    });
+
+    window.addEventListener('scroll', updateMobileNavOnScroll, { passive: true });
+}
+
+function setMobileNavActive(target) {
+    document.querySelectorAll('.mobile-nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.target === target);
+    });
+}
+
+function updateMobileNavOnScroll() {
+    const anchors = ['today', 'drinks', 'events', 'deals'];
+    const threshold = window.scrollY + window.innerHeight / 3;
+    let current = 'today';
+
+    for (const id of anchors) {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= threshold) current = id;
+    }
+
+    // Map "deals" section back to no bottom nav item — keep last real match
+    const targetMap = { today: 'today', drinks: 'drinks', events: 'events', deals: 'events' };
+    setMobileNavActive(targetMap[current] || 'today');
 }
 
 // ========== SMOOTH SCROLLING ==========
