@@ -417,7 +417,9 @@ function initMobileNav() {
             if (target === 'search') {
                 openSearchOverlay();
             } else {
-                const section = document.getElementById(target);
+                // For "today", scroll to the giveaway banner (#home) so it's visible above the deals
+                const scrollId = target === 'today' ? 'home' : target;
+                const section = document.getElementById(scrollId);
                 if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 setMobileNavActive(target);
             }
@@ -491,12 +493,24 @@ function renderOverlayResults(query, priceRange) {
     const q = query.trim().toLowerCase();
 
     const matches = allDeals.filter(deal => {
+        // Hide events when a specific price range is active
+        if (priceRange !== 'all' && deal.category === 'event') return false;
         const text = [deal.deal, deal.business, deal.details, deal.location]
             .filter(Boolean).join(' ').toLowerCase();
         const searchMatch = !q || text.includes(q);
         const priceMatch = priceInRange(extractPrice(deal), priceRange);
         return searchMatch && priceMatch;
     });
+
+    // Sort: deals with an explicit price first, unknown price last
+    if (priceRange !== 'all') {
+        matches.sort((a, b) => {
+            const pa = extractPrice(a), pb = extractPrice(b);
+            if (pa !== null && pb === null) return -1;
+            if (pa === null && pb !== null) return 1;
+            return 0;
+        });
+    }
 
     if (!q && priceRange === 'all') {
         container.innerHTML = '<p class="search-overlay-hint">Start typing to find deals...</p>';
