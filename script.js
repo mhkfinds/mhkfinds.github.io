@@ -607,29 +607,47 @@ console.log('%cFollow @mhkfinds on Instagram for daily deals!', 'font-size: 12px
 
 // ========== MODAL FUNCTIONALITY ==========
 
+function getDirectionsUrl(location, business) {
+    const base = location || business || 'Manhattan, KS';
+    const full = base.toLowerCase().includes('manhattan') ? base : `${base}, Manhattan, KS`;
+    const encoded = encodeURIComponent(full);
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    return isIOS
+        ? `https://maps.apple.com/?address=${encoded}`
+        : `https://www.google.com/maps/search/?api=1&query=${encoded}`;
+}
+
 function openDealModal(deal) {
     const modal = document.getElementById('dealModal');
-    
+
     // Populate modal with deal data
     document.getElementById('modalIcon').textContent = deal.icon || '🎁';
     document.getElementById('modalDealName').textContent = deal.deal || 'Deal';
     document.getElementById('modalBusiness').textContent = deal.business || 'Business';
     document.getElementById('modalLocation').textContent = deal.location || 'N/A';
-    
+
     // Show/hide details
     const detailsRow = document.getElementById('modalDetailsRow');
-    
     if (deal.details) {
         document.getElementById('modalDetails').textContent = deal.details;
         detailsRow.style.display = 'block';
     } else {
         detailsRow.style.display = 'none';
     }
-    
+
+    // Directions button
+    const directionsBtn = document.getElementById('modalDirectionsBtn');
+    if (deal.location || deal.business) {
+        directionsBtn.href = getDirectionsUrl(deal.location, deal.business);
+        directionsBtn.style.display = 'flex';
+    } else {
+        directionsBtn.style.display = 'none';
+    }
+
     // Show modal
     modal.style.display = 'flex';
     modal.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
 }
 
 function closeDealModal() {

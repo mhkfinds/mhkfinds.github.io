@@ -1234,6 +1234,29 @@ footer p {
     border: 2px solid #f0f0f0;
 }
 
+.directions-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.85rem 1.5rem;
+    background: linear-gradient(135deg, #512888, #7c3aae);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(81, 40, 136, 0.35);
+    transition: all 0.2s ease;
+}
+
+.directions-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(81, 40, 136, 0.5);
+}
+
 .modal-info p {
     margin: 0.75rem 0;
     font-size: 1rem;
