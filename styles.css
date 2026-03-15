@@ -453,13 +453,9 @@ body {
     }
 
     .giveaway-banner-label {
-        font-size: 0.65rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .giveaway-banner-label {
-        display: none;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        padding: 0.25rem 0.65rem;
     }
 }
 
