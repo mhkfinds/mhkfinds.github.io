@@ -253,7 +253,134 @@ function createDealCard(deal) {
 }
 
 // Load deals when page loads
-window.addEventListener('DOMContentLoaded', loadDeals);
+window.addEventListener('DOMContentLoaded', () => {
+    loadDeals();
+    initSearch();
+    initPriceFilter();
+});
+
+// ========== SEARCH & PRICE FILTER ==========
+
+let activePriceFilter = 'all';
+
+function initSearch() {
+    const input = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('searchClear');
+
+    input.addEventListener('input', () => {
+        clearBtn.style.display = input.value.trim() ? 'flex' : 'none';
+        applyFilters();
+    });
+
+    clearBtn.addEventListener('click', () => {
+        input.value = '';
+        clearBtn.style.display = 'none';
+        applyFilters();
+        input.focus();
+    });
+}
+
+function initPriceFilter() {
+    document.querySelectorAll('.price-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.price-filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activePriceFilter = btn.dataset.range;
+            applyFilters();
+        });
+    });
+}
+
+// Extract the lowest price from deal name + details.
+// Returns a number (dollars), or null if no price found.
+function extractPrice(deal) {
+    const text = `${deal.deal || ''} ${deal.details || ''}`;
+
+    if (/\bfree\b/i.test(text)) return 0;
+
+    const dollars = [...text.matchAll(/\$(\d+(?:\.\d{1,2})?)/g)].map(m => parseFloat(m[1]));
+    const cents   = [...text.matchAll(/(\d+)¢/g)].map(m => parseFloat(m[1]) / 100);
+    const all     = [...dollars, ...cents];
+
+    return all.length ? Math.min(...all) : null;
+}
+
+function priceInRange(price, range) {
+    if (range === 'all')   return true;
+    if (price === null)    return true; // unknown price → show in every bucket
+    if (range === 'under5')  return price < 5;
+    if (range === '5to10')   return price >= 5  && price < 10;
+    if (range === '10to15')  return price >= 10 && price < 15;
+    if (range === '15plus')  return price >= 15;
+    return true;
+}
+
+function applyFilters() {
+    const input       = document.getElementById('searchInput');
+    const resultCount = document.getElementById('searchResultCount');
+    const query       = input ? input.value.trim().toLowerCase() : '';
+    const isFiltering = query || activePriceFilter !== 'all';
+
+    let matchCount = 0;
+
+    document.querySelectorAll('.card').forEach(card => {
+        try {
+            const deal = JSON.parse(card.dataset.dealData || '{}');
+
+            // Search match
+            let searchMatch = true;
+            if (query) {
+                const searchText = [deal.deal, deal.business, deal.details, deal.location]
+                    .filter(Boolean).join(' ').toLowerCase();
+                searchMatch = searchText.includes(query);
+            }
+
+            // Price match
+            const priceMatch = priceInRange(extractPrice(deal), activePriceFilter);
+
+            if (searchMatch && priceMatch) {
+                card.classList.remove('search-hidden');
+                matchCount++;
+            } else {
+                card.classList.add('search-hidden');
+            }
+        } catch (e) {
+            card.classList.remove('search-hidden');
+        }
+    });
+
+    // Per-section empty-state messages
+    ['today', 'drinks', 'events', 'deals'].forEach(id => {
+        const section = document.getElementById(id);
+        if (!section) return;
+        const grid = section.querySelector('.grid');
+        if (!grid) return;
+
+        const visible = section.querySelectorAll('.card:not(.search-hidden)').length;
+        let msg = grid.querySelector('.search-no-results');
+
+        if (visible === 0 && isFiltering) {
+            if (!msg) {
+                msg = document.createElement('p');
+                msg.className = 'search-no-results';
+                grid.appendChild(msg);
+            }
+            msg.textContent = 'No deals match your filters.';
+            msg.style.display = 'block';
+        } else if (msg) {
+            msg.style.display = 'none';
+        }
+    });
+
+    if (isFiltering) {
+        resultCount.textContent = matchCount === 0
+            ? 'No deals found'
+            : `${matchCount} deal${matchCount !== 1 ? 's' : ''} found`;
+        resultCount.style.display = 'block';
+    } else {
+        resultCount.style.display = 'none';
+    }
+}
 
 // ========== SMOOTH SCROLLING ==========
 // Makes navigation links scroll smoothly to sections

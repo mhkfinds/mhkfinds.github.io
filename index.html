@@ -47,17 +47,41 @@
         <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
         <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
         <!-- Giveaway Banner -->
-        <section class="giveaway" id="home">
-            <h1>🎁 Current Giveaway</h1>
-            <p>N/A</p>
-            <div class="giveaway-links">
-                <a href="https://instagram.com/mhkfinds" target="_blank" class="giveaway-btn instagram">
-                   <ion-icon name="logo-instagram"></ion-icon>
-                </a>
-                <a href="https://www.facebook.com/share/16sFJ5WZsY/?mibextid=wwXIfr" target="_blank" class="giveaway-btn facebook">
-                    <ion-icon name="logo-facebook"></ion-icon>
-                </a>
+        <section class="giveaway-banner" id="home">
+            <div class="giveaway-banner-inner">
+                <div class="giveaway-banner-text">
+                    <span class="giveaway-banner-icon">🎁</span>
+                    <span class="giveaway-banner-label">GIVEAWAY</span>
+                    <span class="giveaway-banner-desc">Win $15 Gift Card — Starbucks, Chipotle, or Chick-fil-A</span>
+                </div>
+                <div class="giveaway-banner-actions">
+                    <a href="https://instagram.com/mhkfinds" target="_blank" class="giveaway-enter-btn">Enter Now</a>
+                    <a href="https://instagram.com/mhkfinds" target="_blank" class="giveaway-social-btn instagram" aria-label="Instagram">
+                        <ion-icon name="logo-instagram"></ion-icon>
+                    </a>
+                    <a href="https://www.facebook.com/share/16sFJ5WZsY/?mibextid=wwXIfr" target="_blank" class="giveaway-social-btn facebook" aria-label="Facebook">
+                        <ion-icon name="logo-facebook"></ion-icon>
+                    </a>
+                </div>
             </div>
+        </section>
+
+        <!-- Search Bar -->
+        <section class="search-section">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search deals, businesses, or locations...">
+                <button id="searchClear" class="search-clear" aria-label="Clear search">✕</button>
+            </div>
+            <div class="price-filter-bar">
+                <span class="price-filter-label">Budget:</span>
+                <button class="price-filter-btn active" data-range="all">All</button>
+                <button class="price-filter-btn" data-range="under5">Under $5</button>
+                <button class="price-filter-btn" data-range="5to10">$5–$10</button>
+                <button class="price-filter-btn" data-range="10to15">$10–$15</button>
+                <button class="price-filter-btn" data-range="15plus">$15+</button>
+            </div>
+            <p id="searchResultCount" class="search-result-count"></p>
         </section>
 
         <!-- Today's Top Deals -->
