@@ -299,36 +299,38 @@ body {
     }
 }
 
-/* ========== SEARCH BAR ========== */
+/* ========== SEARCH BAR (in navbar) ========== */
 .search-section {
     background: linear-gradient(135deg, #512888 0%, #3a1f63 100%);
-    padding: 1.5rem 2rem;
+    padding: 1rem 2rem;
     text-align: center;
     box-shadow: 0 4px 20px rgba(81, 40, 136, 0.3);
 }
 
-.search-wrapper {
+/* Search wrapper sits inline with nav link pills */
+.nav-links .search-wrapper {
     display: flex;
     align-items: center;
-    max-width: 600px;
-    margin: 0 auto;
     background: rgba(255, 255, 255, 0.15);
-    border: 2px solid rgba(255, 255, 255, 0.25);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 50px;
-    padding: 0.6rem 1.25rem;
+    padding: 0.85rem 1.25rem;
     backdrop-filter: blur(10px);
+    min-width: 200px;
     transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    position: relative;
+    z-index: 1;
 }
 
-.search-wrapper:focus-within {
+.nav-links .search-wrapper:focus-within {
     background: rgba(255, 255, 255, 0.22);
     border-color: #FFD700;
-    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.25);
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
 }
 
 .search-icon {
-    font-size: 1.1rem;
-    margin-right: 0.6rem;
+    font-size: 1rem;
+    margin-right: 0.5rem;
     flex-shrink: 0;
     opacity: 0.85;
 }
@@ -342,6 +344,7 @@ body {
     color: white;
     outline: none;
     font-family: inherit;
+    min-width: 0;
 }
 
 .search-input::placeholder {
@@ -359,11 +362,11 @@ body {
     font-size: 0.85rem;
     font-weight: 700;
     cursor: pointer;
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     flex-shrink: 0;
-    margin-left: 0.5rem;
+    margin-left: 0.4rem;
     transition: background 0.2s;
 }
 
@@ -1052,6 +1055,10 @@ footer p {
 
     .navbar {
         padding: 1rem 1.5rem;
+    }
+
+    .nav-links .search-wrapper {
+        display: none;
     }
 
     .search-section {

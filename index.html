@@ -37,8 +37,12 @@
             <a href="#drinks">Drinks</a>
             <a href="#events">Events</a>
             <a href="#deals">Other Deals</a>
-            
             <a href="https://docs.google.com/forms/d/e/1FAIpQLSdHN7QrGJri4QhX6TdvxKCxjB7gcktkmquMbqC_I4VJoxl60Q/viewform?usp=header" target="_blank">Submit a Deal</a>
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search deals...">
+                <button id="searchClear" class="search-clear" aria-label="Clear search">✕</button>
+            </div>
         </div>
     </nav>
 
@@ -66,13 +70,8 @@
             </div>
         </section>
 
-        <!-- Search Bar -->
+        <!-- Price Filter Bar (desktop) -->
         <section class="search-section">
-            <div class="search-wrapper">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" class="search-input" placeholder="Search deals, businesses, or locations...">
-                <button id="searchClear" class="search-clear" aria-label="Clear search">✕</button>
-            </div>
             <div class="price-filter-bar">
                 <span class="price-filter-label">Budget:</span>
                 <button class="price-filter-btn active" data-range="all">All</button>
