@@ -165,14 +165,34 @@
         </div>
     </footer>
 
-    <!-- ========== MORE MENU (mobile) ========== -->
-    <div class="more-menu-overlay" id="moreOverlay"></div>
-    <div class="more-menu" id="moreMenu">
-        <button class="more-menu-item" data-target="deals">
-            <span>🏷️</span> Other Deals
+    <!-- ========== SEARCH OVERLAY (mobile) ========== -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-overlay-bar">
+            <div class="search-overlay-input-wrap">
+                <span class="search-overlay-icon">🔍</span>
+                <input type="text" id="searchOverlayInput" placeholder="Search deals, businesses..." autocomplete="off">
+            </div>
+            <button class="search-overlay-cancel" id="searchOverlayCancel">Cancel</button>
+        </div>
+        <div class="search-overlay-filters">
+            <button class="overlay-price-btn active" data-range="all">All</button>
+            <button class="overlay-price-btn" data-range="under5">Under $5</button>
+            <button class="overlay-price-btn" data-range="5to10">$5–$10</button>
+            <button class="overlay-price-btn" data-range="10to15">$10–$15</button>
+            <button class="overlay-price-btn" data-range="15plus">$15+</button>
+        </div>
+        <div class="search-overlay-results" id="searchOverlayResults">
+            <p class="search-overlay-hint">Start typing to find deals...</p>
+        </div>
+    </div>
+
+    <!-- ========== MORE PANEL (mobile) ========== -->
+    <div class="more-panel" id="morePanel">
+        <button class="more-panel-item" id="morePanelDeals">
+            <span>🏷️</span><span>Other Deals</span>
         </button>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdHN7QrGJri4QhX6TdvxKCxjB7gcktkmquMbqC_I4VJoxl60Q/viewform?usp=header" target="_blank" class="more-menu-item">
-            <span>📝</span> Submit a Deal
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdHN7QrGJri4QhX6TdvxKCxjB7gcktkmquMbqC_I4VJoxl60Q/viewform?usp=header" target="_blank" class="more-panel-item">
+            <span>📝</span><span>Submit a Deal</span>
         </a>
     </div>
 

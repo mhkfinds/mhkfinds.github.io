@@ -4,6 +4,8 @@
    ================================================ */
 
 // ========== GOOGLE SHEETS CONFIGURATION ==========
+let allDeals = []; // global store for overlay search
+
 // Replace this URL with YOUR published Google Sheets CSV URL
 const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT3QxDHqv4FuFfW2ygOAAPGco5WW-OJzAKYbdIQQ8lHguKr4e8yLnf7rNqHafiljTuW8h6-9-AWOCht/pub?gid=0&single=true&output=csv';
 
@@ -52,6 +54,9 @@ async function loadDeals() {
             return dateA - dateB;
         });
         
+        // Store all deals for overlay search
+        allDeals = deals;
+
         // Render deals to the page
         renderDeals('today', todayDeals);
         renderDeals('drinks', drinkDeals);
@@ -258,6 +263,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initSearch();
     initPriceFilter();
     initMobileNav();
+    initSearchOverlay();
 });
 
 // ========== SEARCH & PRICE FILTER ==========
@@ -386,57 +392,59 @@ function applyFilters() {
 // ========== MOBILE BOTTOM NAV ==========
 
 function initMobileNav() {
-    const navItems = document.querySelectorAll('.mobile-nav-item');
-    const moreMenu = document.getElementById('moreMenu');
-    const moreOverlay = document.getElementById('moreOverlay');
+    const morePanel = document.getElementById('morePanel');
 
-    function closeMoreMenu() {
-        moreMenu.classList.remove('open');
-        moreOverlay.classList.remove('open');
+    function closeMorePanel() {
+        morePanel.classList.remove('open');
     }
 
-    navItems.forEach(item => {
+    document.querySelectorAll('.mobile-nav-item').forEach(item => {
         item.addEventListener('click', () => {
             const target = item.dataset.target;
 
             if (target === 'more') {
-                const isOpen = moreMenu.classList.contains('open');
-                if (isOpen) {
-                    closeMoreMenu();
-                } else {
-                    moreMenu.classList.add('open');
-                    moreOverlay.classList.add('open');
+                const isOpen = morePanel.classList.contains('open');
+                closeMorePanel();
+                if (!isOpen) {
+                    morePanel.classList.add('open');
                     setMobileNavActive('more');
                 }
                 return;
             }
 
-            closeMoreMenu();
+            closeMorePanel();
 
             if (target === 'search') {
-                document.querySelector('.search-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                setTimeout(() => document.getElementById('searchInput').focus(), 400);
+                openSearchOverlay();
             } else {
                 const section = document.getElementById(target);
                 if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setMobileNavActive(target);
             }
-
-            setMobileNavActive(target);
         });
     });
 
-    // Close menu when tapping the overlay
-    moreOverlay.addEventListener('click', closeMoreMenu);
-
-    // "Other Deals" item inside the more menu
-    moreMenu.querySelector('[data-target="deals"]').addEventListener('click', () => {
-        closeMoreMenu();
+    // More panel — Other Deals
+    document.getElementById('morePanelDeals').addEventListener('click', () => {
+        closeMorePanel();
         const section = document.getElementById('deals');
         if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setMobileNavActive('more');
     });
 
-    window.addEventListener('scroll', updateMobileNavOnScroll, { passive: true });
+    // Close more panel when tapping outside (on the page content)
+    document.addEventListener('click', e => {
+        if (morePanel.classList.contains('open') &&
+            !morePanel.contains(e.target) &&
+            !e.target.closest('[data-target="more"]')) {
+            closeMorePanel();
+        }
+    });
+
+    window.addEventListener('scroll', () => {
+        closeMorePanel();
+        updateMobileNavOnScroll();
+    }, { passive: true });
 }
 
 function setMobileNavActive(target) {
@@ -449,15 +457,91 @@ function updateMobileNavOnScroll() {
     const anchors = ['today', 'drinks', 'events', 'deals'];
     const threshold = window.scrollY + window.innerHeight / 3;
     let current = 'today';
-
     for (const id of anchors) {
         const el = document.getElementById(id);
         if (el && el.offsetTop <= threshold) current = id;
     }
-
-    // Map "deals" section back to no bottom nav item — keep last real match
     const targetMap = { today: 'today', drinks: 'drinks', events: 'events', deals: 'events' };
     setMobileNavActive(targetMap[current] || 'today');
+}
+
+// ========== SEARCH OVERLAY ==========
+
+let overlayPriceFilter = 'all';
+
+function openSearchOverlay() {
+    const overlay = document.getElementById('searchOverlay');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('searchOverlayInput').focus(), 100);
+    renderOverlayResults('', 'all');
+}
+
+function closeSearchOverlay() {
+    const overlay = document.getElementById('searchOverlay');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    document.getElementById('searchOverlayInput').value = '';
+    overlayPriceFilter = 'all';
+    document.querySelectorAll('.overlay-price-btn').forEach(b => b.classList.toggle('active', b.dataset.range === 'all'));
+}
+
+function renderOverlayResults(query, priceRange) {
+    const container = document.getElementById('searchOverlayResults');
+    const q = query.trim().toLowerCase();
+
+    const matches = allDeals.filter(deal => {
+        const text = [deal.deal, deal.business, deal.details, deal.location]
+            .filter(Boolean).join(' ').toLowerCase();
+        const searchMatch = !q || text.includes(q);
+        const priceMatch = priceInRange(extractPrice(deal), priceRange);
+        return searchMatch && priceMatch;
+    });
+
+    if (!q && priceRange === 'all') {
+        container.innerHTML = '<p class="search-overlay-hint">Start typing to find deals...</p>';
+        return;
+    }
+
+    if (matches.length === 0) {
+        container.innerHTML = '<p class="search-overlay-empty">No deals found</p>';
+        return;
+    }
+
+    container.innerHTML = '';
+    matches.forEach(deal => {
+        const btn = document.createElement('button');
+        btn.className = 'search-result-item';
+        btn.innerHTML = `
+            <span class="search-result-icon">${deal.icon || '🎁'}</span>
+            <div class="search-result-info">
+                <strong>${deal.deal}</strong>
+                <span>${deal.business}</span>
+            </div>`;
+        btn.addEventListener('click', () => {
+            closeSearchOverlay();
+            openDealModal(deal);
+        });
+        container.appendChild(btn);
+    });
+}
+
+function initSearchOverlay() {
+    const input = document.getElementById('searchOverlayInput');
+    document.getElementById('searchOverlayCancel').addEventListener('click', closeSearchOverlay);
+
+    input.addEventListener('input', () => {
+        renderOverlayResults(input.value, overlayPriceFilter);
+    });
+
+    document.querySelectorAll('.overlay-price-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.overlay-price-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            overlayPriceFilter = btn.dataset.range;
+            renderOverlayResults(input.value, overlayPriceFilter);
+        });
+    });
 }
 
 // ========== SMOOTH SCROLLING ==========

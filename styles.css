@@ -808,68 +808,222 @@ footer p {
     }
 }
 
-/* ========== MORE MENU (mobile) ========== */
-.more-menu {
+/* ========== SEARCH OVERLAY (mobile) ========== */
+.search-overlay {
     display: none;
     position: fixed;
-    bottom: 65px;
-    right: 12px;
-    width: 200px;
-    background: white;
-    border-radius: 14px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
-    z-index: 9999;
-    overflow: hidden;
-    animation: popUp 0.18s ease;
+    inset: 0;
+    background: #f6f6f6;
+    z-index: 10000;
+    flex-direction: column;
 }
 
-@keyframes popUp {
-    from { opacity: 0; transform: translateY(8px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+.search-overlay.open {
+    display: flex;
 }
 
-.more-menu.open {
-    display: block;
-}
-
-.more-menu-item {
+.search-overlay-bar {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    background: linear-gradient(135deg, #512888 0%, #3a1f63 100%);
+    flex-shrink: 0;
+}
+
+.search-overlay-input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50px;
+    padding: 0.5rem 1rem;
+    backdrop-filter: blur(10px);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-overlay-input-wrap:focus-within {
+    border-color: #FFD700;
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+}
+
+.search-overlay-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+    opacity: 0.85;
+}
+
+#searchOverlayInput {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    outline: none;
+    font-family: inherit;
+}
+
+#searchOverlayInput::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+}
+
+.search-overlay-cancel {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    padding: 0.4rem 0.25rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.search-overlay-filters {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    background: #3a1f63;
+    overflow-x: auto;
+    flex-shrink: 0;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.search-overlay-filters::-webkit-scrollbar { display: none; }
+
+.overlay-price-btn {
+    padding: 0.3rem 0.85rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.overlay-price-btn.active {
+    background: #FFD700;
+    border-color: #FFD700;
+    color: #2d1b4e;
+}
+
+.search-overlay-results {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.search-overlay-hint,
+.search-overlay-empty {
+    text-align: center;
+    color: #999;
+    padding: 3rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     width: 100%;
-    padding: 1rem 1.25rem;
+    padding: 0.9rem 1.25rem;
+    background: white;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.search-result-item:active {
+    background: rgba(81, 40, 136, 0.06);
+}
+
+.search-result-icon {
+    font-size: 1.75rem;
+    flex-shrink: 0;
+}
+
+.search-result-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.search-result-info strong {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #222;
+}
+
+.search-result-info span {
+    font-size: 0.8rem;
+    color: #888;
+    font-weight: 600;
+}
+
+/* ========== MORE PANEL (mobile) ========== */
+.more-panel {
+    display: none;
+    position: fixed;
+    bottom: 65px;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 2px solid #f0f0f0;
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.12);
+    z-index: 9997;
+    animation: slideUpPanel 0.2s ease;
+}
+
+@keyframes slideUpPanel {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.more-panel.open {
+    display: block;
+}
+
+.more-panel-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1.1rem 1.5rem;
     background: none;
     border: none;
     border-bottom: 1px solid #f2f2f2;
     cursor: pointer;
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #222;
     text-decoration: none;
     text-align: left;
     transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.more-menu-item:last-child {
-    border-bottom: none;
-}
+.more-panel-item:last-child { border-bottom: none; }
 
-.more-menu-item:active {
-    background: rgba(81, 40, 136, 0.07);
-}
+.more-panel-item:active { background: rgba(81, 40, 136, 0.07); }
 
-/* Overlay to close menu on outside tap */
-.more-menu-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 9998;
-}
-
-.more-menu-overlay.open {
-    display: block;
-}
+.more-panel-item span:first-child { font-size: 1.3rem; }
 
 /* ========== RESPONSIVE DESIGN ========== */
 @media (max-width: 768px) {
@@ -898,6 +1052,10 @@ footer p {
 
     .navbar {
         padding: 1rem 1.5rem;
+    }
+
+    .search-section {
+        display: none;
     }
 
     /* Giveaway */
