@@ -254,6 +254,18 @@ function createDealCard(deal) {
     }
     
     card.innerHTML = html;
+
+    // Share button (appended after innerHTML so it isn't wiped)
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'card-share-btn';
+    shareBtn.setAttribute('aria-label', 'Share deal');
+    shareBtn.textContent = '⬆';
+    shareBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        shareDeal(deal, shareBtn);
+    });
+    card.appendChild(shareBtn);
+
     return card;
 }
 
@@ -688,6 +700,31 @@ console.log('%c🎉 Welcome to MHKfinds! 🎉', 'font-size: 20px; color: #512888
 console.log('%cManhattan\'s #1 Student Deal Hub', 'font-size: 14px; color: #FFD700;');
 console.log('%cFollow @mhkfinds on Instagram for daily deals!', 'font-size: 12px; color: #666;');
 
+// ========== SHARE FUNCTIONALITY ==========
+
+async function shareDeal(deal, buttonEl) {
+    const text = `${deal.deal} at ${deal.business}`;
+    const url = 'https://mhkfinds.com';
+
+    if (navigator.share) {
+        try {
+            await navigator.share({ title: 'MHKfinds Deal', text, url });
+        } catch (e) {
+            // User cancelled — do nothing
+        }
+    } else {
+        // Desktop fallback: copy to clipboard
+        try {
+            await navigator.clipboard.writeText(`${text} — ${url}`);
+            const orig = buttonEl.textContent;
+            buttonEl.textContent = '✓ Copied!';
+            setTimeout(() => { buttonEl.textContent = orig; }, 1500);
+        } catch (e) {
+            // ignore
+        }
+    }
+}
+
 // ========== MODAL FUNCTIONALITY ==========
 
 function getDirectionsUrl(location, business) {
@@ -728,6 +765,15 @@ function openDealModal(deal) {
         directionsBtn.style.display = 'flex';
     } else {
         directionsBtn.style.display = 'none';
+    }
+
+    // Share button
+    const shareBtn = document.getElementById('modalShareBtn');
+    if (shareBtn) {
+        shareBtn.onclick = (e) => {
+            e.stopPropagation();
+            shareDeal(deal, shareBtn);
+        };
     }
 
     // Show modal
