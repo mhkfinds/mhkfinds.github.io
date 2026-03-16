@@ -262,7 +262,7 @@ function createDealCard(deal) {
     const shareBtn = document.createElement('button');
     shareBtn.className = 'card-share-btn';
     shareBtn.setAttribute('aria-label', 'Share deal');
-    shareBtn.textContent = '⬆';
+    shareBtn.innerHTML = '<i class="fa-solid fa-share-nodes"></i>';
     shareBtn.addEventListener('click', e => {
         e.stopPropagation();
         shareDeal(deal, shareBtn);
@@ -758,9 +758,9 @@ async function shareDeal(deal, buttonEl) {
         // Desktop fallback: copy to clipboard
         try {
             await navigator.clipboard.writeText(`${text} — ${url}`);
-            const orig = buttonEl.textContent;
-            buttonEl.textContent = '✓ Copied!';
-            setTimeout(() => { buttonEl.textContent = orig; }, 1500);
+            const orig = buttonEl.innerHTML;
+            buttonEl.innerHTML = '✓ Copied!';
+            setTimeout(() => { buttonEl.innerHTML = orig; }, 1500);
         } catch (e) {
             // ignore
         }
