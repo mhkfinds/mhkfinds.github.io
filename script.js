@@ -258,7 +258,23 @@ function createDealCard(deal) {
     
     card.innerHTML = html;
 
-    // Share button (appended after innerHTML so it isn't wiped)
+    // Heart (favorite) button — top-left
+    const heartBtn = document.createElement('button');
+    heartBtn.className = 'card-heart-btn';
+    heartBtn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+    if (isDealFavorited(deal)) {
+        heartBtn.classList.add('favorited');
+        heartBtn.setAttribute('aria-label', 'Unsave deal');
+    } else {
+        heartBtn.setAttribute('aria-label', 'Save deal');
+    }
+    heartBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        toggleFavorite(deal, heartBtn);
+    });
+    card.appendChild(heartBtn);
+
+    // Share button — top-right
     const shareBtn = document.createElement('button');
     shareBtn.className = 'card-share-btn';
     shareBtn.setAttribute('aria-label', 'Share deal');
@@ -337,8 +353,9 @@ function extractPrice(deal) {
 }
 
 function priceInRange(price, range) {
-    if (range === 'all')   return true;
-    if (price === null)    return true; // unknown price → show in every bucket
+    if (range === 'all')     return true;
+    if (range === 'saved')   return true; // handled separately in applyFilters
+    if (price === null)      return true; // unknown price → show in every bucket
     if (range === 'under5')  return price < 5;
     if (range === '5to10')   return price >= 5  && price < 10;
     if (range === '10to15')  return price >= 10 && price < 15;
@@ -354,6 +371,8 @@ function applyFilters() {
 
     let matchCount = 0;
 
+    const favs = activePriceFilter === 'saved' ? getFavorites() : null;
+
     document.querySelectorAll('.card').forEach(card => {
         try {
             const deal = JSON.parse(card.dataset.dealData || '{}');
@@ -364,6 +383,12 @@ function applyFilters() {
                 const searchText = [deal.deal, deal.business, deal.details, deal.location]
                     .filter(Boolean).join(' ').toLowerCase();
                 searchMatch = searchText.includes(query);
+            }
+
+            // Saved filter
+            if (favs !== null && !favs.has(getDealId(deal))) {
+                card.classList.add('search-hidden');
+                return;
             }
 
             // Price match
@@ -539,7 +564,10 @@ function renderOverlayResults(query, priceRange) {
     const container = document.getElementById('searchOverlayResults');
     const q = query.trim().toLowerCase();
 
+    const favs = priceRange === 'saved' ? getFavorites() : null;
+
     const matches = allDeals.filter(deal => {
+        if (favs !== null && !favs.has(getDealId(deal))) return false;
         // Events only show when the user has typed a search query
         if (deal.category === 'event' && !q) return false;
         const text = [deal.deal, deal.business, deal.details, deal.location]
@@ -741,6 +769,43 @@ window.addEventListener('online', () => {
 console.log('%c🎉 Welcome to MHKfinds! 🎉', 'font-size: 20px; color: #512888; font-weight: bold;');
 console.log('%cManhattan\'s #1 Student Deal Hub', 'font-size: 14px; color: #FFD700;');
 console.log('%cFollow @mhkfinds on Instagram for daily deals!', 'font-size: 12px; color: #666;');
+
+// ========== FAVORITES ==========
+
+function getDealId(deal) {
+    return `${deal.deal}|${deal.business}`;
+}
+
+function getFavorites() {
+    try { return new Set(JSON.parse(localStorage.getItem('mhkfinds-favorites') || '[]')); }
+    catch { return new Set(); }
+}
+
+function saveFavorites(set) {
+    localStorage.setItem('mhkfinds-favorites', JSON.stringify([...set]));
+}
+
+function isDealFavorited(deal) {
+    return getFavorites().has(getDealId(deal));
+}
+
+function toggleFavorite(deal, btn) {
+    const favs = getFavorites();
+    const id = getDealId(deal);
+    if (favs.has(id)) {
+        favs.delete(id);
+        btn.classList.remove('favorited');
+        btn.setAttribute('aria-label', 'Save deal');
+    } else {
+        favs.add(id);
+        btn.classList.add('favorited');
+        btn.setAttribute('aria-label', 'Unsave deal');
+    }
+    saveFavorites(favs);
+
+    // Re-apply filters in case 'saved' filter is active
+    if (activePriceFilter === 'saved') applyFilters();
+}
 
 // ========== SHARE FUNCTIONALITY ==========
 

@@ -27,8 +27,9 @@ body {
     position: sticky;
     top: 0;
     z-index: 1000;
-    overflow: hidden;
+    overflow: visible;
 }
+
 
 .navbar::before {
     content: '';
@@ -1396,6 +1397,46 @@ footer p {
     border-radius: 15px;
     margin-bottom: 1.5rem;
     border: 2px solid #f0f0f0;
+}
+
+/* Card heart (favorite) button */
+.card-heart-btn {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(81, 40, 136, 0.1);
+    color: #bbb;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+    line-height: 1;
+}
+
+.card-heart-btn:hover {
+    background: rgba(220, 50, 50, 0.12);
+    color: #e03333;
+    transform: scale(1.15);
+}
+
+.card-heart-btn.favorited {
+    color: #e03333;
+    background: rgba(220, 50, 50, 0.12);
+}
+
+/* Saved filter button — red tint when active */
+.price-filter-btn.saved-filter-btn.active,
+.overlay-price-btn.saved-filter-btn.active {
+    background: #e03333;
+    border-color: #e03333;
+    color: white;
 }
 
 /* Card share button */
