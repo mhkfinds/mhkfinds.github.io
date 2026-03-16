@@ -10,11 +10,18 @@
     padding: 0;
 }
 
+html {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     background: #f6f6f6;
     color: #222;
     line-height: 1.6;
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 /* ========== NAVIGATION ========== */
