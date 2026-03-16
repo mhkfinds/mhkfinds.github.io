@@ -967,6 +967,26 @@ footer p {
     color: #512888;
 }
 
+/* Deal count badge on nav items */
+.nav-badge {
+    position: absolute;
+    top: 4px;
+    right: 10px;
+    background: #512888;
+    color: white;
+    font-size: 0.48rem;
+    font-weight: 800;
+    min-width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    line-height: 1;
+    pointer-events: none;
+}
+
 /* Purple indicator bar at top of active item */
 .mobile-nav-item.active::before {
     content: '';

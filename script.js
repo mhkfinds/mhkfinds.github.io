@@ -62,7 +62,10 @@ async function loadDeals() {
         renderDeals('drinks', drinkDeals);
         renderDeals('deals', otherDeals);
         renderDeals('events', events);
-        
+
+        // Update deal count badges on mobile nav
+        updateNavBadges();
+
         // Render weekly calendar
         renderWeeklyCalendar(deals);
         
@@ -285,10 +288,19 @@ let activePriceFilter = 'all';
 function initSearch() {
     const input = document.getElementById('searchInput');
     const clearBtn = document.getElementById('searchClear');
+    let searchTrackTimeout = null;
 
     input.addEventListener('input', () => {
         clearBtn.style.display = input.value.trim() ? 'flex' : 'none';
         applyFilters();
+        // Track search in GA after user pauses typing (1s debounce)
+        clearTimeout(searchTrackTimeout);
+        const q = input.value.trim();
+        if (q.length >= 2) {
+            searchTrackTimeout = setTimeout(() => {
+                if (typeof gtag !== 'undefined') gtag('event', 'search', { search_term: q });
+            }, 1000);
+        }
     });
 
     clearBtn.addEventListener('click', () => {
@@ -463,6 +475,27 @@ function initMobileNav() {
     }, { passive: true });
 }
 
+function updateNavBadges() {
+    const targets = { today: 'today', drinks: 'drinks', events: 'events' };
+    Object.entries(targets).forEach(([navTarget, sectionId]) => {
+        const section = document.getElementById(sectionId);
+        const btn = document.querySelector(`.mobile-nav-item[data-target="${navTarget}"]`);
+        if (!section || !btn) return;
+        const count = section.querySelectorAll('.card').length;
+        let badge = btn.querySelector('.nav-badge');
+        if (count > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'nav-badge';
+                btn.appendChild(badge);
+            }
+            badge.textContent = count;
+        } else if (badge) {
+            badge.remove();
+        }
+    });
+}
+
 function setMobileNavActive(target) {
     document.querySelectorAll('.mobile-nav-item').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.target === target);
@@ -552,9 +585,18 @@ function renderOverlayResults(query, priceRange) {
 function initSearchOverlay() {
     const input = document.getElementById('searchOverlayInput');
     document.getElementById('searchOverlayCancel').addEventListener('click', closeSearchOverlay);
+    let overlayTrackTimeout = null;
 
     input.addEventListener('input', () => {
         renderOverlayResults(input.value, overlayPriceFilter);
+        // Track search in GA after user pauses typing (1s debounce)
+        clearTimeout(overlayTrackTimeout);
+        const q = input.value.trim();
+        if (q.length >= 2) {
+            overlayTrackTimeout = setTimeout(() => {
+                if (typeof gtag !== 'undefined') gtag('event', 'search', { search_term: q });
+            }, 1000);
+        }
     });
 
     document.querySelectorAll('.overlay-price-btn').forEach(btn => {
