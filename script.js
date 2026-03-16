@@ -290,12 +290,33 @@ function createDealCard(deal) {
 
 // Load deals when page loads
 window.addEventListener('DOMContentLoaded', () => {
+    showSkeletons();
     loadDeals();
     initSearch();
     initPriceFilter();
     initMobileNav();
     initSearchOverlay();
 });
+
+function showSkeletons() {
+    ['today', 'drinks', 'events', 'deals'].forEach(id => {
+        const section = document.getElementById(id);
+        if (!section) return;
+        const grid = section.querySelector('.grid');
+        if (!grid) return;
+        for (let i = 0; i < 3; i++) {
+            const sk = document.createElement('div');
+            sk.className = 'skeleton-card';
+            sk.innerHTML = `
+                <div class="skeleton-pulse skeleton-icon"></div>
+                <div class="skeleton-pulse skeleton-title"></div>
+                <div class="skeleton-pulse skeleton-subtitle"></div>
+                <div class="skeleton-pulse skeleton-tag"></div>
+            `;
+            grid.appendChild(sk);
+        }
+    });
+}
 
 // ========== SEARCH & PRICE FILTER ==========
 
@@ -421,7 +442,9 @@ function applyFilters() {
                 msg.className = 'search-no-results';
                 grid.appendChild(msg);
             }
-            msg.textContent = 'No deals match your filters.';
+            msg.textContent = activePriceFilter === 'saved'
+                ? 'No saved deals yet — tap ❤️ on a deal to save it.'
+                : 'No deals match your filters.';
             msg.style.display = 'block';
         } else if (msg) {
             msg.style.display = 'none';
