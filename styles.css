@@ -905,6 +905,47 @@ body {
 }
 
 /* ========== FOOTER ========== */
+/* ========== SCROLL TO TOP BUTTON ========== */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 5.5rem;
+    right: 1.25rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: none;
+    background: #512888;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(81, 40, 136, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    z-index: 900;
+}
+
+.scroll-top-btn.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.scroll-top-btn:hover {
+    background: #3a1f63;
+    box-shadow: 0 6px 20px rgba(81, 40, 136, 0.55);
+}
+
+@media (min-width: 769px) {
+    .scroll-top-btn {
+        bottom: 1.5rem;
+    }
+}
+
 footer {
     background: #1a0d2e;
     color: white;
