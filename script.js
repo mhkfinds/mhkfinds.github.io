@@ -66,9 +66,6 @@ async function loadDeals() {
         // Update deal count badges on mobile nav
         updateNavBadges();
 
-        // Render weekly calendar
-        renderWeeklyCalendar(deals);
-        
     } catch (error) {
         console.error('Error loading deals:', error);
         // If loading fails, keep the default deals in HTML
@@ -109,10 +106,7 @@ function parseCSV(csvText) {
         
         // Skip rows with no deal name (empty rows)
         const dealName = values[1]?.trim();
-        if (!dealName) {
-            console.log(`Skipping row ${i}: No deal name`);
-            continue;
-        }
+        if (!dealName) continue;
         
         const expiresStr = values[6]?.trim() || '';
         const showOnStr = values[7]?.trim().toLowerCase() || '';
@@ -122,33 +116,16 @@ function parseCSV(csvText) {
         // Check if deal is expired
         if (expiresStr) {
             const expiresDate = new Date(expiresStr);
-            if (expiresDate < today) {
-                console.log(`Deal expired: ${values[1]} (expired ${expiresStr})`);
-                continue; // Skip expired deals
-            }
+            if (expiresDate < today) continue; // Skip expired deals
         }
-        
+
         // Check if deal should show today
         if (showOnStr) {
-            let shouldShow = false;
-            
-            console.log(`Checking deal: "${values[1]}" | Show On: "${showOnStr}" | Current Day: "${currentDay.toLowerCase()}"`);
-            
-            if (showOnStr === 'weekend' && isWeekend) {
-                shouldShow = true;
-                console.log(`  ✓ Weekend deal and today is weekend`);
-            } else if (showOnStr === 'weekday' && isWeekday) {
-                shouldShow = true;
-                console.log(`  ✓ Weekday deal and today is weekday`);
-            } else if (showOnStr === currentDay.toLowerCase()) {
-                shouldShow = true;
-                console.log(`  ✓ Day matches!`);
-            }
-            
-            if (!shouldShow) {
-                console.log(`  ✗ Skipping: Deal shows on "${showOnStr}", but today is "${currentDay}"`);
-                continue; // Skip deals not for today
-            }
+            const shouldShow =
+                (showOnStr === 'weekend' && isWeekend) ||
+                (showOnStr === 'weekday' && isWeekday) ||
+                showOnStr === currentDay.toLowerCase();
+            if (!shouldShow) continue; // Skip deals not for today
         }
         
         deals.push({
@@ -164,9 +141,7 @@ function parseCSV(csvText) {
             featured: featuredStr === 'yes' || featuredStr === 'true' || featuredStr === '1'
         });
     }
-    
-    console.log(`Today is ${currentDay}. Loaded ${deals.length} active deals.`);
-    console.log('Active deals:', deals);
+
     return deals;
 }
 
@@ -946,79 +921,3 @@ document.addEventListener('keydown', function(e) {
         closeDealModal();
     }
 });
-
-
-// ========== WEEKLY CALENDAR FUNCTIONALITY ==========
-
-function renderWeeklyCalendar(deals) {
-    const calendarGrid = document.querySelector('.calendar-grid');
-    if (!calendarGrid) return;
-    
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const dayEmojis = {
-        'Monday': '📅',
-        'Tuesday': '🌮',
-        'Wednesday': '🍷',
-        'Thursday': '🍺',
-        'Friday': '🍕',
-        'Saturday': '🎉',
-        'Sunday': '☀️'
-    };
-    
-    calendarGrid.innerHTML = '';
-    
-    days.forEach(day => {
-        const dayLower = day.toLowerCase();
-        
-        // Count deals for this day
-        const dayDeals = deals.filter(deal => {
-            if (!deal.showOn) return true; // Every day deals count for all days
-            if (deal.showOn === dayLower) return true;
-            if (deal.showOn === 'weekday' && ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].includes(dayLower)) return true;
-            if (deal.showOn === 'weekend' && ['saturday', 'sunday'].includes(dayLower)) return true;
-            return false;
-        });
-        
-        const dealCount = dayDeals.length;
-        
-        // Get top 3 deals for preview
-        const topDeals = dayDeals.slice(0, 3);
-        
-        // Create card
-        const card = document.createElement('div');
-        card.className = 'calendar-day-card';
-        
-        // Highlight today
-        const today = new Date();
-        const todayDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][today.getDay()];
-        if (day === todayDay) {
-            card.classList.add('today');
-        }
-        
-        let html = `
-            <div class="calendar-day-header">
-                <span class="calendar-day-emoji">${dayEmojis[day]}</span>
-                <h3>${day}</h3>
-                <span class="calendar-day-count">${dealCount} deal${dealCount !== 1 ? 's' : ''}</span>
-            </div>
-            <div class="calendar-day-preview">
-        `;
-        
-        if (topDeals.length > 0) {
-            topDeals.forEach(deal => {
-                html += `<div class="calendar-deal-preview">${deal.icon} ${deal.deal}</div>`;
-            });
-            
-            if (dayDeals.length > 3) {
-                html += `<div class="calendar-more">+${dayDeals.length - 3} more</div>`;
-            }
-        } else {
-            html += `<div class="calendar-no-deals">No exclusive deals</div>`;
-        }
-        
-        html += `</div>`;
-        
-        card.innerHTML = html;
-        calendarGrid.appendChild(card);
-    });
-}

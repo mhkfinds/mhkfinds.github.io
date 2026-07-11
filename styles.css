@@ -469,13 +469,6 @@ body {
 }
 
 /* ========== SEARCH BAR (in navbar) ========== */
-.search-section {
-    background: linear-gradient(135deg, #512888 0%, #3a1f63 100%);
-    padding: 1rem 2rem;
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(81, 40, 136, 0.3);
-}
-
 /* Search wrapper in the nav-search-group */
 .nav-search-group .search-wrapper {
     display: flex;
@@ -571,15 +564,6 @@ body {
     margin-top: 0.85rem;
 }
 
-.price-filter-label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: rgba(255, 255, 255, 0.7);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    margin-right: 0.25rem;
-}
-
 .price-filter-btn {
     padding: 0.35rem 0.9rem;
     border: 2px solid rgba(255, 255, 255, 0.3);
@@ -615,12 +599,6 @@ body {
     font-weight: 700;
     color: #FFD700;
     letter-spacing: 0.3px;
-}
-
-@media (max-width: 480px) {
-    .price-filter-label {
-        display: none;
-    }
 }
 
 .card.search-hidden {
@@ -666,10 +644,6 @@ body {
 .skeleton-tag   { width: 40%; height: 14px; border-radius: 20px; }
 
 @media (max-width: 768px) {
-    .search-section {
-        padding: 1rem;
-    }
-
     .search-input {
         font-size: 0.9rem;
     }
@@ -1311,18 +1285,18 @@ footer p {
 @media (max-width: 768px) {
     /* Navigation */
     .navbar {
-        padding: 1.5rem 1rem 1rem;
+        padding: 1rem 1.5rem;
     }
 
     .nav-logo {
         font-size: 2rem;
         margin-bottom: 0.75rem;
     }
-    
+
     .logo-main::before {
         font-size: 1.5rem;
     }
-    
+
     .logo-tagline {
         font-size: 0.6rem;
         letter-spacing: 2px;
@@ -1330,24 +1304,6 @@ footer p {
 
     .nav-row {
         display: none;
-    }
-
-    .navbar {
-        padding: 1rem 1.5rem;
-    }
-
-    /* Giveaway */
-    .giveaway h1 {
-        font-size: 2rem;
-    }
-
-    .giveaway p {
-        font-size: 1.1rem;
-    }
-
-    .giveaway-btn {
-        padding: 0.85rem 2rem;
-        font-size: 1.05rem;
     }
 
     /* Sections */
@@ -1376,10 +1332,6 @@ footer p {
 }
 
 @media (max-width: 480px) {
-    .giveaway h1 {
-        font-size: 1.75rem;
-    }
-
     .section h2 {
         font-size: 1.75rem;
     }
@@ -1610,52 +1562,6 @@ footer p {
     font-weight: 700;
 }
 
-.modal-buttons {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-.modal-btn {
-    flex: 1;
-    min-width: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 1rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 700;
-    text-decoration: none;
-    border-radius: 50px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-}
-
-.modal-btn ion-icon {
-    font-size: 1.3rem;
-}
-
-.modal-btn.directions {
-    background: linear-gradient(135deg, #512888, #7c3aae);
-    color: white;
-}
-
-.modal-btn.directions:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(81, 40, 136, 0.4);
-}
-
-.modal-btn.website {
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    color: #333;
-}
-
-.modal-btn.website:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
-}
-
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -1683,12 +1589,7 @@ footer p {
         padding: 2rem 1.5rem;
         width: 95%;
     }
-    
-    .modal-btn {
-        min-width: 100%;
-        font-size: 0.95rem;
-    }
-    
+
     .modal-icon {
         font-size: 3rem;
     }

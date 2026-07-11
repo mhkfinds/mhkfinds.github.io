@@ -11,7 +11,6 @@ const STATIC_ASSETS = [
   '/styles.css',
   '/script.js',
   '/Logo.png',
-  '/mhk.webp',
   '/manifest.json'
 ];
 
