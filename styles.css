@@ -107,38 +107,16 @@ main {
 
 .brand {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
     flex-shrink: 0;
 }
 
-.brand-tile {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 800;
-    font-size: 1rem;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background: linear-gradient(135deg, var(--purple), var(--purple-bright));
-    box-shadow: 0 4px 10px rgba(81, 40, 136, 0.35);
-}
-
-.brand-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.15;
-}
-
-.brand-name {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-weight: 800;
-    font-size: 1.05rem;
-    color: var(--purple);
-    letter-spacing: -0.02em;
+.brand-logo {
+    height: 28px;
+    width: auto;
+    display: block;
 }
 
 .brand-tag {
@@ -719,6 +697,8 @@ main {
 /* ========== DEAL CARDS (feed style) ========== */
 .card {
     position: relative;
+    display: flex;
+    flex-direction: column;
     background: #fff;
     border: 1px solid var(--card-border);
     border-radius: 18px;
@@ -808,7 +788,8 @@ main {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 0.65rem;
+    margin-top: auto;
+    padding-top: 0.65rem;
 }
 
 .card-hint {
@@ -1646,7 +1627,7 @@ footer p {
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 1rem;
         padding: 0 var(--gutter);
-        align-items: start;
+        /* stretch (default) keeps every card in a row the same height */
     }
 
     .stats-strip {
