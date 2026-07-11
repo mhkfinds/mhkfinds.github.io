@@ -17,7 +17,7 @@
     <!-- Favicon & touch icon -->
     <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="apple-touch-icon" href="icon-192.png">
-    
+
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TFNMEX3CET"></script>
     <script>
@@ -26,149 +26,193 @@
       gtag('js', new Date());
       gtag('config', 'G-TFNMEX3CET');
     </script>
-    
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- ========== NAVIGATION ========== -->
-    <nav class="navbar">
-        <div class="nav-logo">
-            <span class="logo-main">MHKfinds</span>
-            <span class="logo-tagline">MHK Made Easy</span>
-        </div>
-        <div class="nav-row">
-            <div class="nav-links">
-                <a href="#home">Home</a>
-                <a href="#today">Today's Deals</a>
-                <a href="#drinks">Drinks</a>
-                <a href="#events">Events</a>
-                <a href="#deals">Other Deals</a>
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdHN7QrGJri4QhX6TdvxKCxjB7gcktkmquMbqC_I4VJoxl60Q/viewform?usp=header" target="_blank">Submit a Deal</a>
-            </div>
-            <div class="nav-search-group">
-                <div class="search-wrapper">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search deals...">
-                    <button id="searchClear" class="search-clear" aria-label="Clear search">✕</button>
-                </div>
-                <div class="price-filter-bar">
-                    <button class="price-filter-btn active" data-range="all">All</button>
-                    <button class="price-filter-btn" data-range="under5">Under $5</button>
-                    <button class="price-filter-btn" data-range="5to10">$5–$10</button>
-                    <button class="price-filter-btn" data-range="10to15">$10–$15</button>
-                    <button class="price-filter-btn" data-range="15plus">$15+</button>
-                    <button class="price-filter-btn saved-filter-btn" data-range="saved">❤️ Saved</button>
-                </div>
-                <p id="searchResultCount" class="search-result-count"></p>
-            </div>
-        </div>
-    </nav>
 
-    <!-- ========== OFFLINE INDICATOR ========== -->
-    <div id="offlineBanner" class="offline-banner" style="display:none;">
-        📵 You're offline — showing cached deals
+    <!-- Decorative background (visible around the feed on desktop) -->
+    <div class="bg-blobs" aria-hidden="true">
+        <span class="blob blob-1"></span>
+        <span class="blob blob-2"></span>
+        <span class="blob blob-3"></span>
     </div>
 
-    <!-- ========== INSTALL BANNER ========== -->
-    <div id="installBanner" class="install-banner" style="display:none;">
-        <span>📱 Add MHKfinds to your home screen for faster access!</span>
-        <div class="install-banner-actions">
-            <button id="installBtn" class="install-btn">Add to Home Screen</button>
-            <button id="installDismiss" class="install-dismiss">✕</button>
-        </div>
-    </div>
+    <div class="app">
 
-    <!-- ========== iOS INSTALL TOOLTIP ========== -->
-    <div id="iosTooltip" class="ios-tooltip" style="display:none;">
-        <div class="ios-tooltip-content">
-            <button id="iosTooltipClose" class="ios-tooltip-close">✕</button>
-            <p class="ios-tooltip-title">📱 Add to Home Screen</p>
-            <p class="ios-tooltip-step">1. Tap the <strong>Share</strong> button <span class="ios-share-icon">⬆</span> at the bottom of Safari</p>
-            <p class="ios-tooltip-step">2. Scroll down and tap <strong>"Add to Home Screen"</strong></p>
-            <p class="ios-tooltip-step">3. Tap <strong>"Add"</strong> — done!</p>
-        </div>
-        <div class="ios-tooltip-arrow"></div>
-    </div>
-
-    <!-- ========== MAIN CONTENT ========== -->
-    <main>
-        <!-- Giveaway Banner -->
-        <section class="giveaway-banner" id="home">
-            <div class="giveaway-banner-inner">
-                <div class="giveaway-banner-text">
-                    <span class="giveaway-banner-icon">🎁</span>
-                    <span class="giveaway-banner-label">Giveaway!</span>
-                    <span class="giveaway-banner-desc">Win $15 Gift Card — Starbucks, Chipotle, or Chick-fil-A</span>
-                </div>
-                <div class="giveaway-banner-actions">
-                    <a href="https://instagram.com/mhkfinds" target="_blank" class="giveaway-enter-btn">Enter Now</a>
-                    <a href="https://instagram.com/mhkfinds" target="_blank" class="giveaway-social-btn instagram" aria-label="Instagram">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="https://www.facebook.com/share/16sFJ5WZsY/?mibextid=wwXIfr" target="_blank" class="giveaway-social-btn facebook" aria-label="Facebook">
-                        <i class="fab fa-facebook"></i>
-                    </a>
+        <!-- ========== TOP BAR ========== -->
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-tile">M</div>
+                <div class="brand-text">
+                    <span class="brand-name">MHKfinds</span>
+                    <span class="brand-tag">MHK Made Easy</span>
                 </div>
             </div>
-        </section>
-
-
-        <!-- Today's Top Deals -->
-        <section id="today" class="section">
-            <h2>Today's Deals</h2>
-            <div class="grid">
-                <!-- Cards will be loaded from Google Sheets -->
+            <div class="search-wrapper">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search deals, food, drinks…" autocomplete="off">
+                <button id="searchClear" class="search-clear" aria-label="Clear search">✕</button>
             </div>
-        </section>
+        </header>
 
-        <!-- Drinks & Happy Hours -->
-        <section id="drinks" class="section alt">
-            <h2>Drink Deals</h2>
-            <p class="section-subtitle">Drink specials, happy hours, and coffee deals.</p>
-            <div class="grid">
-                <!-- Cards will be loaded from Google Sheets -->
-            </div>
-        </section>
+        <!-- ========== OFFLINE INDICATOR ========== -->
+        <div id="offlineBanner" class="offline-banner" style="display:none;">
+            📵 You're offline — showing cached deals
+        </div>
 
-         <!-- Events & Specials -->
-        <section id="events" class="section">
-            <h2>Events</h2>
-            <p class="section-subtitle">Weekly events first, then upcoming one-time events</p>
-            <div class="grid">
-                <!-- Cards will be loaded from Google Sheets -->
+        <!-- ========== INSTALL BANNER ========== -->
+        <div id="installBanner" class="install-banner" style="display:none;">
+            <span>📱 Add MHKfinds to your home screen for faster access!</span>
+            <div class="install-banner-actions">
+                <button id="installBtn" class="install-btn">Add to Home Screen</button>
+                <button id="installDismiss" class="install-dismiss">✕</button>
             </div>
-        </section>
+        </div>
 
-        <!-- Other Deals -->
-        <section id="deals" class="section alt">
-            <h2>Other Deals</h2>
-            <div class="grid">
-                <!-- Cards will be loaded from Google Sheets -->
+        <!-- ========== iOS INSTALL TOOLTIP ========== -->
+        <div id="iosTooltip" class="ios-tooltip" style="display:none;">
+            <div class="ios-tooltip-content">
+                <button id="iosTooltipClose" class="ios-tooltip-close">✕</button>
+                <p class="ios-tooltip-title">📱 Add to Home Screen</p>
+                <p class="ios-tooltip-step">1. Tap the <strong>Share</strong> button <span class="ios-share-icon">⬆</span> at the bottom of Safari</p>
+                <p class="ios-tooltip-step">2. Scroll down and tap <strong>"Add to Home Screen"</strong></p>
+                <p class="ios-tooltip-step">3. Tap <strong>"Add"</strong> — done!</p>
             </div>
-        </section>
+            <div class="ios-tooltip-arrow"></div>
+        </div>
 
-        <!-- Stats Section -->
-        <section class="stats">
-            <div class="stat">
-                <h3>1,000+</h3>
-                <p>Students Reached</p>
-            </div>
-            <div class="stat">
-                <h3>50+</h3>
-                <p>Active Deals</p>
-            </div>
-            <div class="stat">
-                <h3>25+</h3>
-                <p>Local Businesses</p>
-            </div>
-        </section>
-    </main>
+        <!-- ========== MAIN FEED ========== -->
+        <main>
 
+            <!-- Giveaway Banner -->
+            <section class="giveaway" id="home">
+                <div class="giveaway-frame">
+                    <div class="giveaway-card">
+                        <div class="giveaway-emoji">🎁</div>
+                        <div class="giveaway-text">
+                            <span class="giveaway-badge">Giveaway</span>
+                            <span class="giveaway-title">Win a $15 Gift Card</span>
+                            <span class="giveaway-sub">Starbucks, Chipotle, or Chick-fil-A</span>
+                        </div>
+                        <a href="https://instagram.com/mhkfinds" target="_blank" class="giveaway-enter-btn">Enter Now</a>
+                    </div>
+                </div>
+            </section>
 
-   <!-- ========== DEAL MODAL ========== -->
+            <!-- Featured Partners (paid placement — driven by the sheet's Featured column) -->
+            <section id="partners" class="partners" style="display:none;">
+                <div class="section-head">
+                    <div>
+                        <h2><span class="head-accent"></span>Featured Partners</h2>
+                        <p class="head-sub">Prime placement · Sponsored</p>
+                    </div>
+                </div>
+                <div class="partners-scroll" id="partnersScroll"></div>
+            </section>
+
+            <!-- Filter chips -->
+            <div class="chips-row price-filter-bar">
+                <button class="price-filter-btn active" data-range="all">All</button>
+                <button class="price-filter-btn saved-filter-btn" data-range="saved">♥ Saved</button>
+                <button class="price-filter-btn" data-range="under5">Under $5</button>
+                <button class="price-filter-btn" data-range="5to10">$5–$10</button>
+                <button class="price-filter-btn" data-range="10to15">$10–$15</button>
+                <button class="price-filter-btn" data-range="15plus">$15+</button>
+            </div>
+            <p id="searchResultCount" class="search-result-count"></p>
+
+            <!-- Today's Deals -->
+            <section id="today" class="section">
+                <div class="section-head">
+                    <h2><span class="head-accent"></span>Today's Deals 🔥</h2>
+                </div>
+                <div class="grid">
+                    <!-- Cards loaded from Google Sheets -->
+                </div>
+            </section>
+
+            <!-- Drink Deals -->
+            <section id="drinks" class="section">
+                <div class="section-head">
+                    <div>
+                        <h2><span class="head-accent"></span>Drink Deals 🍹</h2>
+                        <p class="head-sub">Drink specials, happy hours, and coffee deals</p>
+                    </div>
+                </div>
+                <div class="grid">
+                    <!-- Cards loaded from Google Sheets -->
+                </div>
+            </section>
+
+            <!-- Events -->
+            <section id="events" class="section">
+                <div class="section-head">
+                    <div>
+                        <h2><span class="head-accent"></span>Events 🎉</h2>
+                        <p class="head-sub">Weekly events first, then upcoming one-time events</p>
+                    </div>
+                </div>
+                <div class="grid">
+                    <!-- Cards loaded from Google Sheets -->
+                </div>
+            </section>
+
+            <!-- Other Deals -->
+            <section id="deals" class="section">
+                <div class="section-head">
+                    <h2><span class="head-accent"></span>Other Deals ✨</h2>
+                </div>
+                <div class="grid">
+                    <!-- Cards loaded from Google Sheets -->
+                </div>
+            </section>
+
+            <p class="feed-end">You're all caught up · Go Wildcats 🐾</p>
+
+            <!-- Stats strip -->
+            <section class="stats-strip">
+                <div class="stat">
+                    <h3>1,000+</h3>
+                    <p>Students Reached</p>
+                </div>
+                <div class="stat">
+                    <h3>50+</h3>
+                    <p>Active Deals</p>
+                </div>
+                <div class="stat">
+                    <h3>25+</h3>
+                    <p>Local Businesses</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- ========== FOOTER ========== -->
+        <footer>
+            <div class="socials">
+                <a href="https://instagram.com/mhkfinds" target="_blank" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+                    Instagram
+                </a>
+                <a href="https://facebook.com/mhkfinds" target="_blank" aria-label="Facebook">
+                    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M13.5 21v-7h2.4l.4-3h-2.8V9.1c0-.9.3-1.5 1.6-1.5h1.3V4.9c-.3 0-1.1-.1-2.1-.1-2.1 0-3.5 1.3-3.5 3.6V11H8.5v3h2.3v7h2.7Z"/></svg>
+                    Facebook
+                </a>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdHN7QrGJri4QhX6TdvxKCxjB7gcktkmquMbqC_I4VJoxl60Q/viewform?usp=header" target="_blank">
+                    📝 Submit a Deal
+                </a>
+            </div>
+            <p>© 2026 MHKfinds • Manhattan, KS • Made for K-State Students</p>
+        </footer>
+
+    </div><!-- /.app -->
+
+    <!-- ========== DEAL MODAL ========== -->
     <div id="dealModal" class="modal" style="display: none;">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
@@ -184,37 +228,25 @@
                     📍 Get Directions
                 </button>
                 <button id="modalShareBtn" class="modal-share-btn">
-                    <i class="fa-solid fa-share-nodes"></i> Share
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>
+                    Share
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ========== FOOTER ========== -->
-    <footer>
-        <p>© 2026 MHKfinds • Manhattan, KS • Made for K-State Students</p>
-        <div class="socials">
-            <a href="https://instagram.com/mhkfinds" target="_blank">
-                <i class="fab fa-instagram"></i> Instagram
-            </a>
-            <a href="https://facebook.com/mhkfinds" target="_blank">
-                <i class="fab fa-facebook"></i> Facebook
-            </a>
-        </div>
-    </footer>
-
-    <!-- ========== SEARCH OVERLAY (mobile) ========== -->
+    <!-- ========== SEARCH OVERLAY ========== -->
     <div class="search-overlay" id="searchOverlay">
         <div class="search-overlay-bar">
             <div class="search-overlay-input-wrap">
-                <span class="search-overlay-icon">🔍</span>
+                <svg class="search-overlay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
                 <input type="text" id="searchOverlayInput" placeholder="Search deals, businesses..." autocomplete="off">
             </div>
             <button class="search-overlay-cancel" id="searchOverlayCancel">Cancel</button>
         </div>
         <div class="search-overlay-filters">
             <button class="overlay-price-btn active" data-range="all">All</button>
-            <button class="overlay-price-btn saved-filter-btn" data-range="saved">❤️ Saved</button>
+            <button class="overlay-price-btn saved-filter-btn" data-range="saved">♥ Saved</button>
             <button class="overlay-price-btn" data-range="under5">Under $5</button>
             <button class="overlay-price-btn" data-range="5to10">$5–$10</button>
             <button class="overlay-price-btn" data-range="10to15">$10–$15</button>
@@ -225,7 +257,7 @@
         </div>
     </div>
 
-    <!-- ========== MORE PANEL (mobile) ========== -->
+    <!-- ========== MORE PANEL ========== -->
     <div class="more-panel" id="morePanel">
         <button class="more-panel-item" id="morePanelDeals">
             <span>🏷️</span><span>Other Deals</span>
@@ -235,33 +267,43 @@
         </a>
     </div>
 
-    <!-- ========== MOBILE BOTTOM NAV ========== -->
-    <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <!-- ========== BOTTOM NAV ========== -->
+    <nav class="mobile-bottom-nav" aria-label="Main navigation">
         <button class="mobile-nav-item active" data-target="today" aria-label="Today's Deals">
-            <span class="mobile-nav-icon">🏠</span>
+            <span class="mobile-nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9Z"/><path d="M9 21v-6h6v6"/></svg>
+            </span>
             <span class="mobile-nav-label">Today</span>
         </button>
         <button class="mobile-nav-item" data-target="drinks" aria-label="Drink Deals">
-            <span class="mobile-nav-icon">🍺</span>
+            <span class="mobile-nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2h8l-1 7a5 5 0 0 1-10 0L8 2Z"/><path d="M12 14v8M8 22h8"/></svg>
+            </span>
             <span class="mobile-nav-label">Drinks</span>
         </button>
         <button class="mobile-nav-item" data-target="events" aria-label="Events">
-            <span class="mobile-nav-icon">📅</span>
+            <span class="mobile-nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+            </span>
             <span class="mobile-nav-label">Events</span>
         </button>
         <button class="mobile-nav-item" data-target="search" aria-label="Search">
-            <span class="mobile-nav-icon">🔍</span>
+            <span class="mobile-nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </span>
             <span class="mobile-nav-label">Search</span>
         </button>
         <button class="mobile-nav-item" data-target="more" aria-label="More options">
-            <span class="mobile-nav-icon">☰</span>
+            <span class="mobile-nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>
+            </span>
             <span class="mobile-nav-label">More</span>
         </button>
     </nav>
 
     <!-- ========== SCROLL TO TOP ========== -->
     <button id="scrollTopBtn" class="scroll-top-btn" aria-label="Scroll to top">
-        <i class="fa-solid fa-chevron-up"></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 15 7-7 7 7"/></svg>
     </button>
 
     <!-- ========== JAVASCRIPT ========== -->

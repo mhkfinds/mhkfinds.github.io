@@ -6,6 +6,11 @@
 // ========== GOOGLE SHEETS CONFIGURATION ==========
 let allDeals = []; // global store for overlay search
 
+// Inline SVG icons (stroke follows the button's text color)
+const ICON_HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.6Z"/></svg>';
+const ICON_SHARE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>';
+const ICON_ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+
 // Replace this URL with YOUR published Google Sheets CSV URL
 const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT3QxDHqv4FuFfW2ygOAAPGco5WW-OJzAKYbdIQQ8lHguKr4e8yLnf7rNqHafiljTuW8h6-9-AWOCht/pub?gid=0&single=true&output=csv';
 
@@ -15,12 +20,17 @@ async function loadDeals() {
         const response = await fetch(GOOGLE_SHEET_URL);
         const csvText = await response.text();
         const deals = parseCSV(csvText);
-        
+
+        // Partner-tier deals go to the Featured Partners carousel only;
+        // everything else flows into the normal feed sections
+        const partners = deals.filter(deal => deal.partner);
+        const feedDeals = deals.filter(deal => !deal.partner);
+
         // Separate deals by category
-        let todayDeals = deals.filter(deal => deal.category === 'today');
-        let drinkDeals = deals.filter(deal => deal.category === 'drinks');
-        const otherDeals = deals.filter(deal => deal.category === 'other');
-        let events = deals.filter(deal => deal.category === 'event');
+        let todayDeals = feedDeals.filter(deal => deal.category === 'today');
+        let drinkDeals = feedDeals.filter(deal => deal.category === 'drinks');
+        const otherDeals = feedDeals.filter(deal => deal.category === 'other');
+        let events = feedDeals.filter(deal => deal.category === 'event');
         
         // Sort Today's Deals: Featured first, then randomize the rest
         const featuredToday = todayDeals.filter(deal => deal.featured);
@@ -54,6 +64,7 @@ async function loadDeals() {
         allDeals = deals;
 
         // Render deals to the page
+        renderPartners(partners);
         renderDeals('today', todayDeals);
         renderDeals('drinks', drinkDeals);
         renderDeals('deals', otherDeals);
@@ -156,7 +167,9 @@ function parseCSV(csvText) {
         const expiresStr = values[6]?.trim() || '';
         const showOnStr = values[7]?.trim().toLowerCase() || '';
         const eventDateStr = values[8]?.trim() || ''; // Event Date column
-        const featuredStr = values[9]?.trim().toLowerCase() || ''; // Featured column
+        // Featured column tiers: 'partner' = paid carousel spot at the top,
+        // 'yes'/'true'/'1' = gold featured card inside its feed section
+        const featuredStr = values[9]?.trim().toLowerCase() || '';
         
         // Check if deal is expired — a deal stays visible THROUGH its
         // expiration date and disappears the day after
@@ -184,7 +197,8 @@ function parseCSV(csvText) {
             expires: expiresStr,
             showOn: showOnStr,
             eventDate: eventDateStr,
-            featured: featuredStr === 'yes' || featuredStr === 'true' || featuredStr === '1'
+            featured: featuredStr === 'yes' || featuredStr === 'true' || featuredStr === '1' || featuredStr === 'featured',
+            partner: featuredStr === 'partner'
         });
     }
 
@@ -216,71 +230,65 @@ function renderDeals(sectionId, deals) {
     });
 }
 
-// Create a deal card element
+// Create a deal card element (feed style)
 function createDealCard(deal) {
     const card = document.createElement('div');
     card.className = 'card';
-    
+
     // Add featured class if deal is featured
     if (deal.featured) {
         card.classList.add('featured');
     }
-    
-    card.style.cursor = 'pointer'; // Show it's clickable
-    
+
     // Store deal data for modal
     card.dataset.dealData = JSON.stringify(deal);
-    
+
     // Add click handler
     card.addEventListener('click', () => openDealModal(deal));
-    
-    // Build the card HTML
-    let html = '';
-    
-    // Add featured badge if deal is featured
-    if (deal.featured) {
-        html += `<div class="featured-badge">⭐ Featured</div>`;
-    }
-    
-    // Add icon if exists
-    if (deal.icon) {
-        html += `<div class="card-icon">${deal.icon}</div>`;
-    }
-    
-    // Add deal name
-    if (deal.deal) {
-        html += `<h3>${deal.deal}</h3>`;
-    }
-    
-    // Add business name
-    if (deal.business) {
-        html += `<p>${deal.business}</p>`;
-    }
-    
-    // Add location or details
-    let smallText = deal.details || deal.location;
-    
-    // For events, add date if available (parsed in local timezone)
+
+    // Meta line: location or details; events get their date prefixed
+    let metaText = deal.details || deal.location;
     if (deal.category === 'event' && deal.eventDate) {
         const eventDate = parseLocalDate(deal.eventDate);
         if (eventDate) {
             const options = { weekday: 'short', month: 'short', day: 'numeric' };
             const formattedDate = eventDate.toLocaleDateString('en-US', options);
-            smallText = `📅 ${formattedDate}` + (smallText ? ` • ${smallText}` : '');
+            metaText = `📅 ${formattedDate}` + (metaText ? ` • ${metaText}` : '');
         }
     }
-    
-    if (smallText) {
-        const prefix = deal.location && !deal.details && deal.category !== 'event' ? '📍 ' : '';
-        html += `<small>${prefix}${smallText}</small>`;
-    }
-    
-    card.innerHTML = html;
 
-    // Heart (favorite) button — top-left
+    card.innerHTML = `
+        ${deal.featured ? '<div class="featured-badge">★ Featured</div>' : ''}
+        <div class="card-main">
+            <div class="card-emoji">${deal.icon || '🎁'}</div>
+            <div class="card-info">
+                ${deal.deal ? `<h3>${deal.deal}</h3>` : ''}
+                ${deal.business ? `<p class="card-biz">${deal.business}</p>` : ''}
+                ${metaText ? `<small class="card-meta"><span class="meta-dot"></span><span>${metaText}</span></small>` : ''}
+            </div>
+        </div>
+        <div class="card-actions">
+            <span class="card-hint">Tap for details</span>
+            <div class="card-buttons"></div>
+        </div>`;
+
+    const buttons = card.querySelector('.card-buttons');
+
+    // Share button
+    const shareBtn = document.createElement('button');
+    shareBtn.className = 'card-share-btn';
+    shareBtn.setAttribute('aria-label', 'Share deal');
+    shareBtn.innerHTML = ICON_SHARE;
+    shareBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        shareDeal(deal, shareBtn);
+    });
+    buttons.appendChild(shareBtn);
+
+    // Heart (favorite) button
     const heartBtn = document.createElement('button');
     heartBtn.className = 'card-heart-btn';
-    heartBtn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+    heartBtn.innerHTML = ICON_HEART;
     if (isDealFavorited(deal)) {
         heartBtn.classList.add('favorited');
         heartBtn.setAttribute('aria-label', 'Unsave deal');
@@ -291,20 +299,48 @@ function createDealCard(deal) {
         e.stopPropagation();
         toggleFavorite(deal, heartBtn);
     });
-    card.appendChild(heartBtn);
-
-    // Share button — top-right
-    const shareBtn = document.createElement('button');
-    shareBtn.className = 'card-share-btn';
-    shareBtn.setAttribute('aria-label', 'Share deal');
-    shareBtn.innerHTML = '<i class="fa-solid fa-share-nodes"></i>';
-    shareBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        shareDeal(deal, shareBtn);
-    });
-    card.appendChild(shareBtn);
+    buttons.appendChild(heartBtn);
 
     return card;
+}
+
+// ========== FEATURED PARTNERS CAROUSEL ==========
+
+function createPartnerCard(deal) {
+    const el = document.createElement('article');
+    el.className = 'partner-card';
+    el.innerHTML = `
+        <span class="partner-flag">Partner</span>
+        <div class="partner-emoji">${deal.icon || '🎁'}</div>
+        <h3 class="partner-title">${deal.deal}</h3>
+        ${deal.details ? `<p class="partner-details">${deal.details}</p>` : ''}
+        <div class="partner-foot">
+            <div class="partner-biz">
+                <span class="partner-avatar">${(deal.business || '?').charAt(0).toUpperCase()}</span>
+                <span class="partner-biz-text">
+                    <strong>${deal.business || ''}</strong>
+                    ${deal.location ? `<small><span class="meta-dot"></span>${deal.location}</small>` : ''}
+                </span>
+            </div>
+            <button class="partner-go" aria-label="View deal">${ICON_ARROW}</button>
+        </div>`;
+    el.addEventListener('click', () => openDealModal(deal));
+    return el;
+}
+
+function renderPartners(partners) {
+    const section = document.getElementById('partners');
+    const scroll = document.getElementById('partnersScroll');
+    if (!section || !scroll) return;
+
+    if (partners.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = '';
+    scroll.innerHTML = '';
+    partners.forEach(deal => scroll.appendChild(createPartnerCard(deal)));
 }
 
 // Load deals when page loads
@@ -328,9 +364,10 @@ function showSkeletons() {
             sk.className = 'skeleton-card';
             sk.innerHTML = `
                 <div class="skeleton-pulse skeleton-icon"></div>
-                <div class="skeleton-pulse skeleton-title"></div>
-                <div class="skeleton-pulse skeleton-subtitle"></div>
-                <div class="skeleton-pulse skeleton-tag"></div>
+                <div class="skeleton-lines">
+                    <div class="skeleton-pulse skeleton-title"></div>
+                    <div class="skeleton-pulse skeleton-subtitle"></div>
+                </div>
             `;
             grid.appendChild(sk);
         }
@@ -679,51 +716,6 @@ function initSearchOverlay() {
     });
 }
 
-// ========== SMOOTH SCROLLING ==========
-// Makes navigation links scroll smoothly to sections
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    });
-});
-
-// ========== ACTIVE NAV LINK HIGHLIGHTING ==========
-// Highlights the current section in the navigation
-
-const sections = document.querySelectorAll('section[id]');
-const navLinks = document.querySelectorAll('.nav-links a[href^="#"]');
-
-window.addEventListener('scroll', () => {
-    let current = '';
-    
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.clientHeight;
-        
-        if (window.pageYOffset >= (sectionTop - 200)) {
-            current = section.getAttribute('id');
-        }
-    });
-    
-    navLinks.forEach(link => {
-        link.style.background = 'rgba(255, 255, 255, 0.15)';
-        link.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-        
-        if (link.getAttribute('href') === `#${current}`) {
-            link.style.background = 'rgba(255, 255, 255, 0.25)';
-            link.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-        }
-    });
-});
-
 // ========== PWA: SERVICE WORKER + INSTALL PROMPT ==========
 
 // Register service worker
@@ -853,6 +845,9 @@ function toggleFavorite(deal, btn) {
         favs.add(id);
         btn.classList.add('favorited');
         btn.setAttribute('aria-label', 'Unsave deal');
+        // Pop animation on save
+        btn.classList.add('pop');
+        setTimeout(() => btn.classList.remove('pop'), 400);
     }
     saveFavorites(favs);
 
@@ -877,7 +872,8 @@ async function shareDeal(deal, buttonEl) {
         try {
             await navigator.clipboard.writeText(`${text} — ${url}`);
             const orig = buttonEl.innerHTML;
-            buttonEl.innerHTML = '✓ Copied!';
+            // Small round card buttons only fit a checkmark
+            buttonEl.innerHTML = buttonEl.classList.contains('card-share-btn') ? '✓' : '✓ Copied!';
             setTimeout(() => { buttonEl.innerHTML = orig; }, 1500);
         } catch (e) {
             // ignore
