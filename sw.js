@@ -3,14 +3,15 @@
    Bump CACHE_NAME version whenever you push new code
    ================================================ */
 
-const CACHE_NAME = 'mhkfinds-v10';
+const CACHE_NAME = 'mhkfinds-v11';
 
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/styles.css',
   '/script.js',
-  '/Logo.png',
+  '/icon-192.png',
+  '/icon-512.png',
   '/manifest.json'
 ];
 

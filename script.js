@@ -46,12 +46,8 @@ async function loadDeals() {
             // A is one-time, B is recurring - B comes first
             if (hasDateA && !hasDateB) return 1;
             
-            // Both have dates - sort chronologically (FIXED: parse in local timezone)
-            const [yearA, monthA, dayA] = a.eventDate.split('-').map(Number);
-            const [yearB, monthB, dayB] = b.eventDate.split('-').map(Number);
-            const dateA = new Date(yearA, monthA - 1, dayA);
-            const dateB = new Date(yearB, monthB - 1, dayB);
-            return dateA - dateB;
+            // Both have dates - sort chronologically (parsed in local timezone)
+            return parseLocalDate(a.eventDate) - parseLocalDate(b.eventDate);
         });
         
         // Store all deals for overlay search
@@ -82,26 +78,75 @@ function shuffleArray(array) {
     return shuffled;
 }
 
+// Parse a date string as LOCAL time (new Date('2026-07-15') would be UTC,
+// which shifts the day in US timezones). Handles YYYY-MM-DD and M/D/YYYY.
+function parseLocalDate(str) {
+    if (!str) return null;
+    const iso = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (iso) return new Date(+iso[1], +iso[2] - 1, +iso[3]);
+    const us = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+    if (us) {
+        const year = +us[3] < 100 ? +us[3] + 2000 : +us[3];
+        return new Date(year, +us[1] - 1, +us[2]);
+    }
+    const fallback = new Date(str);
+    return isNaN(fallback) ? null : fallback;
+}
+
+// Split CSV text into rows of fields, respecting quoted fields
+// (so commas and line breaks inside a cell don't corrupt the row)
+function parseCSVRows(text) {
+    const rows = [];
+    let row = [];
+    let field = '';
+    let inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (inQuotes) {
+            if (ch === '"') {
+                if (text[i + 1] === '"') { field += '"'; i++; } // escaped quote
+                else inQuotes = false;
+            } else {
+                field += ch;
+            }
+        } else if (ch === '"') {
+            inQuotes = true;
+        } else if (ch === ',') {
+            row.push(field);
+            field = '';
+        } else if (ch === '\n' || ch === '\r') {
+            if (ch === '\r' && text[i + 1] === '\n') i++;
+            row.push(field);
+            rows.push(row);
+            row = [];
+            field = '';
+        } else {
+            field += ch;
+        }
+    }
+    if (field !== '' || row.length > 0) {
+        row.push(field);
+        rows.push(row);
+    }
+    return rows;
+}
+
 // Parse CSV text into array of deal objects
 function parseCSV(csvText) {
-    const lines = csvText.trim().split('\n');
+    const rows = parseCSVRows(csvText.trim());
     const deals = [];
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Reset to start of day for accurate comparison
-    
+
     const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const currentDay = daysOfWeek[today.getDay()];
     const isWeekend = (today.getDay() === 0 || today.getDay() === 6); // Sunday or Saturday
     const isWeekday = !isWeekend;
-    
-    // Skip header row (line 0), start from line 1
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue; // Skip empty lines
-        
-        // Simple CSV split by comma
-        const values = line.split(',');
-        
+
+    // Skip header row (row 0), start from row 1
+    for (let i = 1; i < rows.length; i++) {
+        const values = rows[i];
+
         if (values.length < 3) continue; // Skip invalid rows
         
         // Skip rows with no deal name (empty rows)
@@ -113,10 +158,11 @@ function parseCSV(csvText) {
         const eventDateStr = values[8]?.trim() || ''; // Event Date column
         const featuredStr = values[9]?.trim().toLowerCase() || ''; // Featured column
         
-        // Check if deal is expired
+        // Check if deal is expired — a deal stays visible THROUGH its
+        // expiration date and disappears the day after
         if (expiresStr) {
-            const expiresDate = new Date(expiresStr);
-            if (expiresDate < today) continue; // Skip expired deals
+            const expiresDate = parseLocalDate(expiresStr);
+            if (expiresDate && expiresDate < today) continue; // Skip expired deals
         }
 
         // Check if deal should show today
@@ -214,16 +260,14 @@ function createDealCard(deal) {
     // Add location or details
     let smallText = deal.details || deal.location;
     
-    // For events, add date if available
-    // FIXED: Parse date in local timezone to avoid timezone offset issues
+    // For events, add date if available (parsed in local timezone)
     if (deal.category === 'event' && deal.eventDate) {
-        // Parse date components and create date in local timezone (not UTC)
-        const [year, month, day] = deal.eventDate.split('-').map(Number);
-        const eventDate = new Date(year, month - 1, day); // month is 0-indexed in JavaScript
-        
-        const options = { weekday: 'short', month: 'short', day: 'numeric' };
-        const formattedDate = eventDate.toLocaleDateString('en-US', options);
-        smallText = `📅 ${formattedDate}` + (smallText ? ` • ${smallText}` : '');
+        const eventDate = parseLocalDate(deal.eventDate);
+        if (eventDate) {
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            const formattedDate = eventDate.toLocaleDateString('en-US', options);
+            smallText = `📅 ${formattedDate}` + (smallText ? ` • ${smallText}` : '');
+        }
     }
     
     if (smallText) {

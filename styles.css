@@ -338,10 +338,10 @@ body {
     width: 40%;
     height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-    animation: shimmer 3s ease-in-out infinite;
+    animation: shimmer-sweep 3s ease-in-out infinite;
 }
 
-@keyframes shimmer {
+@keyframes shimmer-sweep {
     0%   { left: -60%; }
     100% { left: 120%; }
 }
