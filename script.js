@@ -714,6 +714,14 @@ function initSearchOverlay() {
             renderOverlayResults(input.value, overlayPriceFilter);
         });
     });
+
+    // If the window grows to desktop size while the overlay is open,
+    // close it so body scrolling isn't left locked
+    window.addEventListener('resize', () => {
+        if (window.innerWidth >= 900 && document.getElementById('searchOverlay').classList.contains('open')) {
+            closeSearchOverlay();
+        }
+    });
 }
 
 // ========== PWA: SERVICE WORKER + INSTALL PROMPT ==========
