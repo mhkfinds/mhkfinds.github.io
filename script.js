@@ -178,12 +178,16 @@ function parseCSV(csvText) {
             if (expiresDate && expiresDate < today) continue; // Skip expired deals
         }
 
-        // Check if deal should show today
+        // Check if deal should show today — Show On can be a single value
+        // or a comma-separated list ("Friday, Saturday")
         if (showOnStr) {
-            const shouldShow =
-                (showOnStr === 'weekend' && isWeekend) ||
-                (showOnStr === 'weekday' && isWeekday) ||
-                showOnStr === currentDay.toLowerCase();
+            const shouldShow = showOnStr.split(',')
+                .map(t => t.trim())
+                .filter(Boolean)
+                .some(t =>
+                    (t === 'weekend' && isWeekend) ||
+                    (t === 'weekday' && isWeekday) ||
+                    t === currentDay.toLowerCase());
             if (!shouldShow) continue; // Skip deals not for today
         }
         
@@ -198,7 +202,8 @@ function parseCSV(csvText) {
             showOn: showOnStr,
             eventDate: eventDateStr,
             featured: featuredStr === 'yes' || featuredStr === 'true' || featuredStr === '1' || featuredStr === 'featured',
-            partner: featuredStr === 'partner'
+            partner: featuredStr === 'partner',
+            id: values[10]?.trim() || '' // stable ID from the sheet's ID column
         });
     }
 
@@ -463,7 +468,7 @@ function applyFilters() {
             }
 
             // Saved filter
-            if (favs !== null && !favs.has(getDealId(deal))) {
+            if (favs !== null && !dealInFavs(favs, deal)) {
                 card.classList.add('search-hidden');
                 return;
             }
@@ -646,7 +651,7 @@ function renderOverlayResults(query, priceRange) {
     const favs = priceRange === 'saved' ? getFavorites() : null;
 
     const matches = allDeals.filter(deal => {
-        if (favs !== null && !favs.has(getDealId(deal))) return false;
+        if (favs !== null && !dealInFavs(favs, deal)) return false;
         // Events only show when the user has typed a search query
         if (deal.category === 'event' && !q) return false;
         const text = [deal.deal, deal.business, deal.details, deal.location]
@@ -826,7 +831,17 @@ console.log('%cFollow @mhkfinds on Instagram for daily deals!', 'font-size: 12px
 // ========== FAVORITES ==========
 
 function getDealId(deal) {
+    return deal.id || `${deal.deal}|${deal.business}`;
+}
+
+// Favorites saved before the sheet had an ID column were keyed by
+// "deal|business" — keep recognizing those so nobody loses their hearts
+function getLegacyDealId(deal) {
     return `${deal.deal}|${deal.business}`;
+}
+
+function dealInFavs(favs, deal) {
+    return favs.has(getDealId(deal)) || favs.has(getLegacyDealId(deal));
 }
 
 function getFavorites() {
@@ -839,14 +854,15 @@ function saveFavorites(set) {
 }
 
 function isDealFavorited(deal) {
-    return getFavorites().has(getDealId(deal));
+    return dealInFavs(getFavorites(), deal);
 }
 
 function toggleFavorite(deal, btn) {
     const favs = getFavorites();
     const id = getDealId(deal);
-    if (favs.has(id)) {
+    if (dealInFavs(favs, deal)) {
         favs.delete(id);
+        favs.delete(getLegacyDealId(deal));
         btn.classList.remove('favorited');
         btn.setAttribute('aria-label', 'Save deal');
     } else {
@@ -856,6 +872,7 @@ function toggleFavorite(deal, btn) {
         // Pop animation on save
         btn.classList.add('pop');
         setTimeout(() => btn.classList.remove('pop'), 400);
+        trackDeal('save_deal', deal);
     }
     saveFavorites(favs);
 
@@ -863,9 +880,24 @@ function toggleFavorite(deal, btn) {
     if (activePriceFilter === 'saved') applyFilters();
 }
 
+// ========== PER-DEAL ANALYTICS ==========
+
+// Sends save/share/view/directions events to GA per deal — this is the
+// data used to show businesses how their deals perform
+function trackDeal(action, deal) {
+    if (typeof gtag !== 'undefined') {
+        gtag('event', action, {
+            deal_id: getDealId(deal),
+            deal_name: deal.deal,
+            business: deal.business
+        });
+    }
+}
+
 // ========== SHARE FUNCTIONALITY ==========
 
 async function shareDeal(deal, buttonEl) {
+    trackDeal('share_deal', deal);
     const text = `${deal.deal} at ${deal.business}`;
     const url = 'https://mhkfinds.com';
 
@@ -903,6 +935,7 @@ function getDirectionsUrl(location, business) {
 
 function openDealModal(deal) {
     const modal = document.getElementById('dealModal');
+    trackDeal('view_deal', deal);
 
     // Populate modal with deal data
     document.getElementById('modalIcon').textContent = deal.icon || '🎁';
@@ -924,6 +957,7 @@ function openDealModal(deal) {
     if (deal.location || deal.business) {
         directionsBtn.onclick = (e) => {
             e.stopPropagation();
+            trackDeal('get_directions', deal);
             window.open(getDirectionsUrl(deal.location, deal.business), '_blank');
         };
         directionsBtn.style.display = 'flex';
