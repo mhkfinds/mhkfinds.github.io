@@ -5,6 +5,7 @@
 
 // ========== GOOGLE SHEETS CONFIGURATION ==========
 let allDeals = []; // global store for overlay search
+let allDealsAnyDay = []; // includes deals not showing today, for share links
 
 // Inline SVG icons (stroke follows the button's text color)
 const ICON_HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.6Z"/></svg>';
@@ -19,7 +20,8 @@ async function loadDeals() {
     try {
         const response = await fetch(GOOGLE_SHEET_URL);
         const csvText = await response.text();
-        const deals = parseCSV(csvText);
+        allDealsAnyDay = parseCSV(csvText);
+        const deals = allDealsAnyDay.filter(deal => deal.showsToday);
 
         // Partner-tier deals go to the Featured Partners carousel only;
         // everything else flows into the normal feed sections
@@ -72,6 +74,9 @@ async function loadDeals() {
 
         // Update deal count badges on mobile nav
         updateNavBadges();
+
+        // If the visitor arrived via a shared deal link, open that deal
+        openDealFromHash();
 
     } catch (error) {
         console.error('Error loading deals:', error);
@@ -179,16 +184,17 @@ function parseCSV(csvText) {
         }
 
         // Check if deal should show today — Show On can be a single value
-        // or a comma-separated list ("Friday, Saturday")
+        // or a comma-separated list ("Friday, Saturday"). Off-day deals are
+        // kept (flagged) so shared links to them still open.
+        let showsToday = true;
         if (showOnStr) {
-            const shouldShow = showOnStr.split(',')
+            showsToday = showOnStr.split(',')
                 .map(t => t.trim())
                 .filter(Boolean)
                 .some(t =>
                     (t === 'weekend' && isWeekend) ||
                     (t === 'weekday' && isWeekday) ||
                     t === currentDay.toLowerCase());
-            if (!shouldShow) continue; // Skip deals not for today
         }
         
         deals.push({
@@ -203,7 +209,8 @@ function parseCSV(csvText) {
             eventDate: eventDateStr,
             featured: featuredStr === 'yes' || featuredStr === 'true' || featuredStr === '1' || featuredStr === 'featured',
             partner: featuredStr === 'partner',
-            id: values[10]?.trim() || '' // stable ID from the sheet's ID column
+            id: values[10]?.trim() || '', // stable ID from the sheet's ID column
+            showsToday
         });
     }
 
@@ -899,10 +906,26 @@ function trackDeal(action, deal) {
 
 // ========== SHARE FUNCTIONALITY ==========
 
+// Direct link to one deal — opening it lands with the deal's popup open
+function getDealUrl(deal) {
+    return `https://mhkfinds.com/#deal=${encodeURIComponent(getDealId(deal))}`;
+}
+
+function openDealFromHash() {
+    const match = location.hash.match(/^#deal=(.+)$/);
+    if (!match) return;
+    const id = decodeURIComponent(match[1]);
+    const deal = allDealsAnyDay.find(d => getDealId(d) === id);
+    if (deal) openDealModal(deal);
+}
+
+// Also react if a deal link is opened while the app is already running
+window.addEventListener('hashchange', openDealFromHash);
+
 async function shareDeal(deal, buttonEl) {
     trackDeal('share_deal', deal);
     const text = `${deal.deal} at ${deal.business}`;
-    const url = 'https://mhkfinds.com';
+    const url = getDealUrl(deal);
 
     if (navigator.share) {
         try {
@@ -988,6 +1011,11 @@ function closeDealModal() {
     modal.style.display = 'none';
     modal.classList.remove('active');
     document.body.style.overflow = ''; // Restore scrolling
+
+    // Drop a #deal= hash so the same shared link works again later
+    if (location.hash.startsWith('#deal=')) {
+        history.replaceState(null, '', location.pathname + location.search);
+    }
 }
 
 // Close modal when clicking X
