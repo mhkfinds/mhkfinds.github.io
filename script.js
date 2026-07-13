@@ -427,8 +427,11 @@ function extractPrice(deal) {
 
     if (/\bfree\b/i.test(text)) return 0;
 
-    const dollars = [...text.matchAll(/\$(\d+(?:\.\d{1,2})?)/g)].map(m => parseFloat(m[1]));
-    const cents   = [...text.matchAll(/(\d+)¢/g)].map(m => parseFloat(m[1]) / 100);
+    // "$2 off cocktails" is a discount, not a price — ignore those amounts
+    const cleaned = text.replace(/\$\d+(?:\.\d{1,2})?\s*off\b/gi, ' ');
+
+    const dollars = [...cleaned.matchAll(/\$(\d+(?:\.\d{1,2})?)/g)].map(m => parseFloat(m[1]));
+    const cents   = [...cleaned.matchAll(/(\d+)¢/g)].map(m => parseFloat(m[1]) / 100);
     const all     = [...dollars, ...cents];
 
     return all.length ? Math.min(...all) : null;
