@@ -104,34 +104,63 @@ async function fetchText(url) {
   return res.text();
 }
 
-// K-State UPC (Squarespace exposes the events collection as JSON)
+// K-State UPC — parse the public events page HTML. (Their robots.txt
+// disallows the ?format=json shortcut, so we read the same page a
+// visitor sees, which is allowed.)
 async function scrapeUPC() {
-  const data = await fetchJSON('https://www.kstateupc.com/our-events?format=json');
+  const html = await fetchText('https://www.kstateupc.com/our-events');
   const events = [];
-  for (const ev of data.upcoming || []) {
-    const sc = ev.structuredContent || {};
-    if (!sc.startDate) continue;
-    const loc = ev.location || {};
-    const venue = clean((loc.addressTitle || 'K-State Student Union').split('|')[0]);
-    const address = clean([loc.addressLine1, loc.addressLine2].filter(Boolean).join(' ')) || `${venue} Manhattan KS`;
+  const articles = html.split('<article class="eventlist-event').slice(1);
+  for (const block of articles) {
+    if (!block.includes('eventlist-event--upcoming')) continue;
+
+    const title = stripHtml((block.match(/class="eventlist-title-link">([\s\S]*?)<\/a>/) || [])[1]);
+    const href = (block.match(/href="(\/our-events\/[^"]+)"/) || [])[1];
+    if (!title || !href) continue;
+
+    // Google Calendar export link carries exact UTC start/end times
+    const gcal = block.match(/dates=(\d{8}T\d{6}Z)(?:\/|%2F)(\d{8}T\d{6}Z)/);
+    const toIso = s => `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}T${s.slice(9, 11)}:${s.slice(11, 13)}:${s.slice(13, 15)}Z`;
+    let startMs, endMs;
+    if (gcal) {
+      startMs = Date.parse(toIso(gcal[1]));
+      endMs = Date.parse(toIso(gcal[2]));
+    } else {
+      // fallback: the <time class="event-date"> attributes (dates only)
+      const dates = [...block.matchAll(/class="event-date" datetime="(\d{4}-\d{2}-\d{2})"/g)].map(m => m[1]);
+      if (!dates.length) continue;
+      startMs = Date.parse(`${dates[0]}T12:00:00Z`);
+      endMs = Date.parse(`${dates[dates.length - 1]}T12:00:00Z`);
+    }
+
+    const addrText = stripHtml(((block.match(/eventlist-meta-address[^>]*>([\s\S]*?)<a /) || [])[1] || ''));
+    const venue = clean(addrText.split('|')[0]) || 'K-State Student Union';
+    const mapQ = (block.match(/maps\.google\.com\?q=([^"]+)"/) || [])[1];
+    const address = mapQ
+      ? clean(decodeURIComponent(mapQ).replace(/,?\s*United States/, ''))
+      : `${venue} Manhattan KS`;
+
     events.push({
-      title: clean(ev.title),
+      title,
       venue,
       address,
-      details: detailsFor(sc.startDate, sc.endDate, stripHtml(ev.excerpt).slice(0, 80)),
-      eventDate: chicagoYMD(new Date(sc.startDate)),
-      expires: chicagoYMD(new Date(sc.endDate || sc.startDate)),
-      url: `https://www.kstateupc.com/our-events/${ev.urlId}`,
+      details: detailsFor(startMs, endMs, ''),
+      eventDate: chicagoYMD(new Date(startMs)),
+      expires: chicagoYMD(new Date(endMs)),
+      url: `https://www.kstateupc.com${href}`,
     });
   }
   return events;
 }
 
-// Visit Manhattan (Simpleview CMS REST API; token lives in the events page)
+// Visit Manhattan (Simpleview CMS REST API — the same endpoint their own
+// events page calls in the browser; their robots.txt allows everything
+// and asks for a 2s crawl delay, which we honor between requests)
 async function scrapeVisitManhattan() {
   const page = await fetchText('https://www.visitmanhattanks.org/events/');
   const token = (page.match(/"token":"([a-f0-9]+)"/) || [])[1];
   if (!token) throw new Error('Could not find Simpleview API token on the events page');
+  await new Promise(r => setTimeout(r, 2000)); // robots.txt Crawl-delay: 2
 
   const now = new Date();
   const until = new Date(now.getTime() + DAYS_AHEAD * 86400000);
