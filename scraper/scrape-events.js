@@ -335,7 +335,7 @@ async function main() {
     const res = await fetch(inboxUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ secret: inboxSecret, rows }),
+      body: JSON.stringify({ secret: inboxSecret, tab: 'Pending - Events', rows }),
     });
     const out = await res.json().catch(() => ({}));
     if (out.ok) console.log(`delivered ${out.rows} rows to the Pending - Events tab`);
