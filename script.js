@@ -78,9 +78,13 @@ async function loadDeals() {
         // If the visitor arrived via a shared deal link, open that deal
         openDealFromHash();
 
+        document.getElementById('loadError').style.display = 'none';
+
     } catch (error) {
         console.error('Error loading deals:', error);
-        // If loading fails, keep the default deals in HTML
+        // Replace the endlessly-shimmering skeletons with a retry state
+        document.querySelectorAll('.skeleton-card').forEach(el => el.remove());
+        document.getElementById('loadError').style.display = 'block';
     }
 }
 
@@ -368,6 +372,12 @@ window.addEventListener('DOMContentLoaded', () => {
     initPriceFilter();
     initMobileNav();
     initSearchOverlay();
+
+    document.getElementById('loadRetryBtn').addEventListener('click', () => {
+        document.getElementById('loadError').style.display = 'none';
+        showSkeletons();
+        loadDeals();
+    });
 });
 
 function showSkeletons() {

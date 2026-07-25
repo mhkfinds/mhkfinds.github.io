@@ -140,6 +140,12 @@
             </div>
             <p id="searchResultCount" class="search-result-count"></p>
 
+            <!-- Shown only if the deals sheet fails to load -->
+            <div id="loadError" class="load-error" style="display:none;">
+                <p>😕 Couldn't load deals — check your connection.</p>
+                <button id="loadRetryBtn" class="load-retry-btn">Try again</button>
+            </div>
+
             <!-- Today's Deals -->
             <section id="today" class="section">
                 <div class="section-head">
