@@ -197,13 +197,18 @@ function parseCSV(csvText) {
                     t === currentDay.toLowerCase());
         }
         
+        // Sheet uses "food" as the category name; it renders in the
+        // "Today's Deals" section (internally still keyed "today")
+        let category = (values[5]?.trim() || 'other').toLowerCase();
+        if (category === 'food') category = 'today';
+
         deals.push({
             icon: values[0]?.trim() || '🎁',
             deal: values[1]?.trim() || '',
             business: values[2]?.trim() || '',
             location: values[3]?.trim() || '',
             details: values[4]?.trim() || '',
-            category: (values[5]?.trim() || 'other').toLowerCase(),
+            category,
             expires: expiresStr,
             showOn: showOnStr,
             eventDate: eventDateStr,
