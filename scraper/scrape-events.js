@@ -293,6 +293,23 @@ async function main() {
   const HEADER = ['Icon', 'Deal', 'Business', 'Location', 'Details', 'Category', 'Expires', 'Show On', 'Event Date', 'Featured', 'ID', 'Source', 'Contact', 'Notes'];
   fs.writeFileSync(OUT_FILE, [HEADER.join('\t'), ...rows.map(r => r.join('\t'))].join('\n') + '\n', 'utf8');
   console.log(`wrote ${rows.length} new candidate events to ${path.relative(process.cwd(), OUT_FILE)}`);
+
+  // Deliver the same rows to the spreadsheet's "Pending - Events" tab via
+  // the Apps Script inbox (URL + secret live in GitHub Actions secrets)
+  const inboxUrl = process.env.SHEETS_INBOX_URL;
+  const inboxSecret = process.env.SHEETS_INBOX_SECRET;
+  if (inboxUrl && inboxSecret) {
+    const res = await fetch(inboxUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ secret: inboxSecret, rows }),
+    });
+    const out = await res.json().catch(() => ({}));
+    if (out.ok) console.log(`delivered ${out.rows} rows to the Pending - Events tab`);
+    else console.warn(`inbox delivery failed (HTTP ${res.status}):`, JSON.stringify(out));
+  } else {
+    console.log('no inbox configured — TSV only');
+  }
 }
 
 main().catch(err => { console.error(err); process.exit(1); });
