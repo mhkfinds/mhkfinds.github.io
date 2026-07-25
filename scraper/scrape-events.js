@@ -45,6 +45,8 @@ function shortDate(ymd) {
   return new Date(y, m - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
 // ---------- text helpers ----------
 
 function clean(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
@@ -195,16 +197,47 @@ async function scrapeVisitManhattan() {
     const extra = [e.recurrence, e.admission].map(clean).filter(Boolean).join(' · ');
     // Simpleview gives no reliable time-of-day, only dates — so Details
     // is just the date span (multi-day only) plus recurrence/admission
-    const sYmd = chicagoYMD(new Date(e.date));
-    const eYmd = chicagoYMD(new Date(e.endDate || e.date));
-    const span = sYmd === eYmd ? '' : `${shortDate(sYmd)} - ${shortDate(eYmd)}`;
+    const sYmd = chicagoYMD(new Date(e.date));            // next occurrence
+    const eYmd = chicagoYMD(new Date(e.endDate || e.date)); // series/occurrence end
+
+    // Recurring events land pre-formatted the way the sheet expresses them:
+    //   weekly  -> Show On = the day(s), no dates (site repeats it forever)
+    //   monthly / every-2-weeks / other -> no dates, schedule stays in Details
+    //   daily / one-time -> dated, as before
+    // endDate equal to the next occurrence just means "no announced series
+    // end", so only a later endDate is kept as Expires.
+    let eventDate = sYmd;
+    let expires = eYmd;
+    let showOn = '';
+    let span = sYmd === eYmd ? '' : `${shortDate(sYmd)} - ${shortDate(eYmd)}`;
+
+    const rec = clean(e.recurrence || '').toLowerCase();
+    const weekly = rec.match(/^recurring weekly on (.+)$/);
+    if (weekly) {
+      const days = weekly[1].split(/,|\band\b/)
+        .map(s => clean(s).toLowerCase())
+        .filter(d => DAYS.includes(d))
+        .map(d => d[0].toUpperCase() + d.slice(1));
+      if (days.length) {
+        showOn = days.join(', ');
+        eventDate = '';
+        expires = eYmd > sYmd ? eYmd : '';
+        span = '';
+      }
+    } else if (rec.startsWith('recurring') && !rec.startsWith('recurring daily')) {
+      eventDate = '';
+      expires = eYmd > sYmd ? eYmd : '';
+      span = '';
+    }
+
     events.push({
       title: clean(e.title),
       venue: clean(e.location) || 'Manhattan KS',
       address: clean([e.address1, e.city || 'Manhattan', 'KS'].filter(Boolean).join(' ')),
       details: [span, extra].filter(Boolean).join(' · ').slice(0, 140),
-      eventDate: chicagoYMD(new Date(e.date)),       // next occurrence
-      expires: chicagoYMD(new Date(e.endDate || e.date)),
+      eventDate,
+      expires,
+      showOn,
       url: e.url ? `https://www.visitmanhattanks.org${e.url}` : 'https://www.visitmanhattanks.org/events/',
     });
   }
@@ -278,7 +311,7 @@ async function main() {
       ev.details,           // Details
       'event',              // Category
       ev.expires,           // Expires (visible through this date)
-      '',                   // Show On
+      ev.showOn || '',      // Show On (weekly recurring events)
       ev.eventDate,         // Event Date
       '',                   // Featured
       id,                   // ID
