@@ -83,8 +83,7 @@ function refreshDashboard() {
   const topBiz = Object.entries(bizCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
   const fld = r => String(r[9] || '').trim().toLowerCase();
-  const partners = active.filter(r => fld(r) === 'partner').length;
-  const featured = active.filter(r => ['yes', 'true', '1', 'featured'].includes(fld(r))).length;
+  const featured = active.filter(r => ['partner', 'yes', 'true', '1', 'featured'].includes(fld(r))).length;
 
   const srcCounts = {};
   active.forEach(r => {
@@ -125,8 +124,7 @@ function refreshDashboard() {
   push('');
   push('OTHER STATS', '', '', true);
   push('   Businesses listed', Object.keys(bizCounts).length);
-  push('   Featured deals', featured);
-  push('   Partner spots', partners);
+  push('   Featured spots', featured);
   push('   Expiring in next 7 days', expiringSoon);
   push('   By source', '', srcLine);
   push('');

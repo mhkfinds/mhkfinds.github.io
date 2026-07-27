@@ -23,10 +23,10 @@ async function loadDeals() {
         allDealsAnyDay = parseCSV(csvText);
         const deals = allDealsAnyDay.filter(deal => deal.showsToday);
 
-        // Partner-tier deals go to the Featured Partners carousel only;
-        // everything else flows into the normal feed sections
-        const partners = deals.filter(deal => deal.partner);
-        const feedDeals = deals.filter(deal => !deal.partner);
+        // Featured deals get a carousel card up top AND stay in their
+        // normal section, gold-highlighted, shuffled like everything else
+        const featuredDeals = deals.filter(deal => deal.featured);
+        const feedDeals = deals;
 
         // Separate deals by category
         let todayDeals = feedDeals.filter(deal => deal.category === 'today');
@@ -34,15 +34,10 @@ async function loadDeals() {
         const otherDeals = feedDeals.filter(deal => deal.category === 'other');
         let events = feedDeals.filter(deal => deal.category === 'event');
         
-        // Sort Today's Deals: Featured first, then randomize the rest
-        const featuredToday = todayDeals.filter(deal => deal.featured);
-        const regularToday = todayDeals.filter(deal => !deal.featured);
-        todayDeals = [...featuredToday, ...shuffleArray(regularToday)];
-        
-        // Sort Drink Deals: Featured first, then randomize the rest
-        const featuredDrinks = drinkDeals.filter(deal => deal.featured);
-        const regularDrinks = drinkDeals.filter(deal => !deal.featured);
-        drinkDeals = [...featuredDrinks, ...shuffleArray(regularDrinks)];
+        // Randomize section order — featured deals shuffle in with the
+        // rest (the gold highlight is their boost, not position)
+        todayDeals = shuffleArray(todayDeals);
+        drinkDeals = shuffleArray(drinkDeals);
         
         // Sort events: recurring first (no event date), then one-time by date
         events = events.sort((a, b) => {
@@ -66,7 +61,7 @@ async function loadDeals() {
         allDeals = deals;
 
         // Render deals to the page
-        renderPartners(partners);
+        renderPartners(featuredDeals);
         renderDeals('today', todayDeals);
         renderDeals('drinks', drinkDeals);
         renderDeals('deals', otherDeals);
@@ -176,8 +171,8 @@ function parseCSV(csvText) {
         const expiresStr = values[6]?.trim() || '';
         const showOnStr = values[7]?.trim().toLowerCase() || '';
         const eventDateStr = values[8]?.trim() || ''; // Event Date column
-        // Featured column tiers: 'partner' = paid carousel spot at the top,
-        // 'yes'/'true'/'1' = gold featured card inside its feed section
+        // Featured column: any accepted value = carousel card up top plus
+        // a gold-highlighted card in the deal's normal section
         const featuredStr = values[9]?.trim().toLowerCase() || '';
         
         // Check if deal is expired — a deal stays visible THROUGH its
@@ -216,8 +211,7 @@ function parseCSV(csvText) {
             expires: expiresStr,
             showOn: showOnStr,
             eventDate: eventDateStr,
-            featured: featuredStr === 'yes' || featuredStr === 'true' || featuredStr === '1' || featuredStr === 'featured',
-            partner: featuredStr === 'partner',
+            featured: ['yes', 'true', '1', 'featured', 'partner'].includes(featuredStr),
             id: values[10]?.trim() || '', // stable ID from the sheet's ID column
             showsToday
         });
@@ -331,7 +325,7 @@ function createPartnerCard(deal) {
     const el = document.createElement('article');
     el.className = 'partner-card';
     el.innerHTML = `
-        <span class="partner-flag">Partner</span>
+        <span class="partner-flag">★ Featured</span>
         <div class="partner-emoji">${deal.icon || '🎁'}</div>
         <h3 class="partner-title">${deal.deal}</h3>
         ${deal.details ? `<p class="partner-details">${deal.details}</p>` : ''}
