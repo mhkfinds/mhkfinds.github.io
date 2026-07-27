@@ -331,7 +331,6 @@ function createPartnerCard(deal) {
         ${deal.details ? `<p class="partner-details">${deal.details}</p>` : ''}
         <div class="partner-foot">
             <div class="partner-biz">
-                <span class="partner-avatar">${(deal.business || '?').charAt(0).toUpperCase()}</span>
                 <span class="partner-biz-text">
                     <strong>${deal.business || ''}</strong>
                     ${deal.location ? `<small><span class="meta-dot"></span>${deal.location}</small>` : ''}
