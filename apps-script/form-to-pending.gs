@@ -7,9 +7,9 @@
    The raw "Form Responses" tab stays (Google owns it — you
    can hide it with right-click → Hide sheet).
 
-   REQUIRES a form question titled "What date does it happen"
-   (a Section Header + Date item, optional, meant for one-time
-   events — see the setup note Claude gave you in chat).
+   The "If limited-time — last day it's valid" date question
+   does double duty: for a one-time event it's read as the
+   event's date too, not just its expiry.
 
    HOW TO SET UP / UPDATE:
    1. Open the deals spreadsheet → Extensions → Apps Script
@@ -56,12 +56,12 @@ function onDealFormSubmit(e) {
   const contact  = get('Best email or phone') || get('Email Address');
   const nameRole = get('Your name & role');
   const extra    = get('Anything else');
-  const eventDate = get('What date does it happen'); // one-time events only
 
-  let expires = get('If limited-time');
-  // One-time event, no separate expiry given → stays visible through its
-  // own date and disappears the day after, same rule as everywhere else
-  if (eventDate && !expires) expires = eventDate;
+  // One date question covers both jobs: "last day a deal is valid" and
+  // "the date a one-time event happens" — for events it's also Event Date
+  const dateAnswer = get('If limited-time');
+  const expires = dateAnswer;
+  const eventDate = category === 'event' ? dateAnswer : '';
 
   // "Every weekday" / "Weekends" → the sheet's Weekday / Weekend tokens
   const showOn = get('If recurring')
@@ -92,9 +92,9 @@ function onDealFormSubmit(e) {
     address,
     details,
     category,      // food / drinks / event / other
-    expires,       // blank unless limited-time or a dated one-time event
-    showOn,        // blank for one-time / limited-time submissions
-    eventDate,     // blank unless the one-time-event date was filled in
+    expires,       // blank for recurring submissions
+    showOn,        // blank for limited-time / one-time submissions
+    eventDate,     // set only when category is "event"
     '',            // Featured
     id,
     'submitted',
