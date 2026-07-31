@@ -460,9 +460,9 @@ main {
 }
 
 .section-eyebrow {
-    font-size: 0.9rem;
+    font-size: 1.15rem;
     font-weight: 800;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
     color: var(--gold-deep);
     margin-bottom: 0.3rem;
@@ -1630,6 +1630,10 @@ footer p {
 
     .section-head h2 {
         font-size: 1.25rem;
+    }
+
+    .section-eyebrow {
+        font-size: 1.3rem;
     }
 
     .partners-scroll {
