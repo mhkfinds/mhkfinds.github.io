@@ -460,12 +460,12 @@ main {
 }
 
 .section-eyebrow {
-    font-size: 0.66rem;
+    font-size: 0.9rem;
     font-weight: 800;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
     color: var(--gold-deep);
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.3rem;
     padding-left: 0.85rem;
 }
 
