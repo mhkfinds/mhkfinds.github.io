@@ -3,7 +3,7 @@
    Bump CACHE_NAME version whenever you push new code
    ================================================ */
 
-const CACHE_NAME = 'mhkfinds-v31';
+const CACHE_NAME = 'mhkfinds-v32';
 
 const STATIC_ASSETS = [
   '/',

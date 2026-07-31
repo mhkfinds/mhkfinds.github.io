@@ -469,6 +469,21 @@ main {
     padding-left: 0.85rem;
 }
 
+/* Food Deals is the top hero section — center its header instead of
+   the left-aligned look every other section uses */
+#today .section-head {
+    justify-content: center;
+}
+
+#today .section-eyebrow {
+    padding-left: 0;
+    text-align: center;
+}
+
+#today .section-head h2 {
+    justify-content: center;
+}
+
 /* ========== FEATURED PARTNERS CAROUSEL ========== */
 .partners {
     margin-top: 1.25rem;
