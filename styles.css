@@ -460,16 +460,20 @@ main {
 }
 
 /* Sits above the (left-aligned) Food Deals heading as its own
-   centered hook line — independent of the heading's alignment */
+   centered hook pill — gold-on-purple for real contrast, same
+   combo as the giveaway badge, instead of gold text on white */
 .section-eyebrow {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 0.65rem;
     font-size: 1.15rem;
     font-weight: 800;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    color: var(--gold-deep);
-    text-align: center;
-    padding: 0 1rem;
-    margin-bottom: 0.65rem;
+    color: var(--gold);
+    background: var(--purple);
+    padding: 0.3rem 1rem;
+    border-radius: 50px;
 }
 
 /* ========== FEATURED PARTNERS CAROUSEL ========== */
@@ -1637,7 +1641,7 @@ footer p {
 
     .section-eyebrow {
         font-size: 1.3rem;
-        padding: 0 var(--gutter);
+        padding: 0.35rem 1.2rem;
     }
 
     .partners-scroll {
