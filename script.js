@@ -197,7 +197,7 @@ function parseCSV(csvText) {
         }
         
         // Sheet uses "food" as the category name; it renders in the
-        // "Today's Deals" section (internally still keyed "today")
+        // "Food Deals" section (internally still keyed "today")
         let category = (values[5]?.trim() || 'other').toLowerCase();
         if (category === 'food') category = 'today';
 

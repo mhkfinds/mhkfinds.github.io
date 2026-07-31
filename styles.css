@@ -459,6 +459,16 @@ main {
     padding-left: 0.85rem;
 }
 
+.section-eyebrow {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 0.2rem;
+    padding-left: 0.85rem;
+}
+
 /* ========== FEATURED PARTNERS CAROUSEL ========== */
 .partners {
     margin-top: 1.25rem;
