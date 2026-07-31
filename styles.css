@@ -459,29 +459,17 @@ main {
     padding-left: 0.85rem;
 }
 
+/* Sits above the (left-aligned) Food Deals heading as its own
+   centered hook line — independent of the heading's alignment */
 .section-eyebrow {
     font-size: 1.15rem;
     font-weight: 800;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     color: var(--gold-deep);
-    margin-bottom: 0.65rem;
-    padding-left: 0.85rem;
-}
-
-/* Food Deals is the top hero section — center its header instead of
-   the left-aligned look every other section uses */
-#today .section-head {
-    justify-content: center;
-}
-
-#today .section-eyebrow {
-    padding-left: 0;
     text-align: center;
-}
-
-#today .section-head h2 {
-    justify-content: center;
+    padding: 0 1rem;
+    margin-bottom: 0.65rem;
 }
 
 /* ========== FEATURED PARTNERS CAROUSEL ========== */
@@ -1649,6 +1637,7 @@ footer p {
 
     .section-eyebrow {
         font-size: 1.3rem;
+        padding: 0 var(--gutter);
     }
 
     .partners-scroll {
