@@ -79,6 +79,16 @@
             📵 You're offline — showing cached deals
         </div>
 
+        <!-- ========== EMAIL CAPTURE BANNER ========== -->
+        <div id="emailBanner" class="install-banner" style="display:none;">
+            <span>📬 Be the first to know when we start emailing deals!</span>
+            <form id="emailCaptureForm" class="email-capture-form">
+                <input type="email" id="emailCaptureInput" class="email-capture-input" placeholder="you@email.com" required autocomplete="email">
+                <button type="submit" class="install-btn">Notify Me</button>
+                <button type="button" id="emailDismiss" class="install-dismiss">✕</button>
+            </form>
+        </div>
+
         <!-- ========== INSTALL BANNER ========== -->
         <div id="installBanner" class="install-banner" style="display:none;">
             <span>📱 Add MHKfinds to your home screen for faster access!</span>
@@ -230,7 +240,7 @@
                     Submit a Deal
                 </a>
             </div>
-            <p>© 2026 MHKfinds • Manhattan, KS • Made for K-State Students</p>
+            <p>© 2026 MHKfinds • Manhattan, KS • Made for K-State Students • <a href="privacy.html" style="color: var(--gold);">Privacy Policy</a></p>
         </footer>
 
     </div><!-- /.app -->

@@ -262,6 +262,28 @@ main {
     background: rgba(255, 255, 255, 0.3);
 }
 
+.email-capture-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.email-capture-input {
+    padding: 0.45rem 0.9rem;
+    border-radius: 50px;
+    border: none;
+    font-size: 0.8rem;
+    font-family: inherit;
+    min-width: 160px;
+    outline: none;
+}
+
+.email-capture-input:focus {
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.35);
+}
+
 /* ========== iOS INSTALL TOOLTIP ========== */
 .ios-tooltip {
     position: fixed;

@@ -769,25 +769,79 @@ window.addEventListener('beforeinstallprompt', e => {
 // Hide banner after install
 window.addEventListener('appinstalled', () => {
     deferredInstallPrompt = null;
-    hideBanner();
+    hideBanner('installBanner');
 });
 
-function hideBanner() {
-    const b = document.getElementById('installBanner');
+function hideBanner(id) {
+    const b = document.getElementById(id);
     if (b) b.style.display = 'none';
 }
 
-function showBanner() {
-    const b = document.getElementById('installBanner');
+function showBanner(id) {
+    const b = document.getElementById(id);
     if (b) b.style.display = 'flex';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Don't show if already installed or user dismissed permanently
-    if (isStandalone || localStorage.getItem('pwaInstallDismissed')) return;
+// Apps Script web app for the email capture form — no secret on this one:
+// it's called from visitors' browsers, so anything embedded in the site's
+// JS is visible to anyone anyway. Worst case of abuse is a few junk rows
+// to skim before the list is ever actually used.
+const EMAIL_SIGNUP_URL = 'https://script.google.com/macros/s/AKfycbzHfW-K-ZA8RSybcgmoOLF3aR6CNCOF-f4mxTonhHHRJS7jHItPs9q0sYuEPQIdD4jAHA/exec';
 
-    // Show the banner for everyone (iOS + Android)
-    showBanner();
+// Only one top banner shows at a time. Email capture goes first (owning
+// an email list matters more here than PWA installs); once that's been
+// handled — subscribed or dismissed — the install banner gets its turn.
+function maybeShowInstallBanner() {
+    if (isStandalone || localStorage.getItem('pwaInstallDismissed')) return;
+    showBanner('installBanner');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const emailHandled = localStorage.getItem('mhkfinds-email-subscribed')
+        || localStorage.getItem('mhkfinds-email-dismissed');
+
+    if (!emailHandled) {
+        showBanner('emailBanner');
+    } else {
+        maybeShowInstallBanner();
+    }
+
+    // Email capture submit
+    document.getElementById('emailCaptureForm')?.addEventListener('submit', async e => {
+        e.preventDefault();
+        const input = document.getElementById('emailCaptureInput');
+        const email = input.value.trim();
+        if (!email) return;
+
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Saving...';
+
+        try {
+            // no-cors: Apps Script web apps don't send CORS headers, so the
+            // browser can't read the response — fire-and-forget is the
+            // standard pattern for a static site posting into a Sheet
+            await fetch(EMAIL_SIGNUP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({ email })
+            });
+        } catch (err) {
+            console.warn('Email signup request failed:', err);
+        }
+
+        localStorage.setItem('mhkfinds-email-subscribed', '1');
+        hideBanner('emailBanner');
+        maybeShowInstallBanner();
+        if (typeof gtag !== 'undefined') gtag('event', 'email_signup');
+    });
+
+    document.getElementById('emailDismiss')?.addEventListener('click', () => {
+        localStorage.setItem('mhkfinds-email-dismissed', '1');
+        hideBanner('emailBanner');
+        maybeShowInstallBanner();
+    });
 
     // Install button click
     document.getElementById('installBtn')?.addEventListener('click', async () => {
@@ -796,7 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
             deferredInstallPrompt.prompt();
             const { outcome } = await deferredInstallPrompt.userChoice;
             deferredInstallPrompt = null;
-            hideBanner();
+            hideBanner('installBanner');
         } else if (isIOS) {
             // iOS: show step-by-step tooltip
             document.getElementById('iosTooltip').style.display = 'block';
@@ -808,7 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Dismiss banner
     document.getElementById('installDismiss')?.addEventListener('click', () => {
-        hideBanner();
+        hideBanner('installBanner');
         localStorage.setItem('pwaInstallDismissed', '1');
     });
 
