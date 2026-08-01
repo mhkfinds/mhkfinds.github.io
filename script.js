@@ -3,6 +3,15 @@
    Manhattan's #1 Student Deal Hub
    ================================================ */
 
+// ========== GOOGLE ANALYTICS ==========
+// Moved here from an inline <script> tag so index.html's CSP can
+// disallow inline scripts entirely (gtag.js itself is still loaded
+// via a normal <script src> tag in the <head>)
+window.dataLayer = window.dataLayer || [];
+function gtag() { dataLayer.push(arguments); }
+gtag('js', new Date());
+gtag('config', 'G-TFNMEX3CET');
+
 // ========== GOOGLE SHEETS CONFIGURATION ==========
 let allDeals = []; // global store for overlay search
 let allDealsAnyDay = []; // includes deals not showing today, for share links
@@ -272,20 +281,28 @@ function createDealCard(deal) {
         }
     }
 
+    // Skeleton only — no deal-derived text goes into innerHTML. Every
+    // piece of text below gets set via .textContent, which can't
+    // execute HTML/scripts even if a deal field somehow contained markup
     card.innerHTML = `
         ${deal.featured ? '<div class="featured-badge">★ Featured</div>' : ''}
         <div class="card-main">
-            <div class="card-emoji">${deal.icon || '🎁'}</div>
+            <div class="card-emoji"></div>
             <div class="card-info">
-                ${deal.deal ? `<h3>${deal.deal}</h3>` : ''}
-                ${deal.business ? `<p class="card-biz">${deal.business}</p>` : ''}
-                ${metaText ? `<small class="card-meta"><span class="meta-dot"></span><span>${metaText}</span></small>` : ''}
+                ${deal.deal ? `<h3></h3>` : ''}
+                ${deal.business ? `<p class="card-biz"></p>` : ''}
+                ${metaText ? `<small class="card-meta"><span class="meta-dot"></span><span class="card-meta-text"></span></small>` : ''}
             </div>
         </div>
         <div class="card-actions">
             <span class="card-hint">Tap for details</span>
             <div class="card-buttons"></div>
         </div>`;
+
+    card.querySelector('.card-emoji').textContent = deal.icon || '🎁';
+    if (deal.deal) card.querySelector('h3').textContent = deal.deal;
+    if (deal.business) card.querySelector('.card-biz').textContent = deal.business;
+    if (metaText) card.querySelector('.card-meta-text').textContent = metaText;
 
     const buttons = card.querySelector('.card-buttons');
 
@@ -324,20 +341,29 @@ function createDealCard(deal) {
 function createPartnerCard(deal) {
     const el = document.createElement('article');
     el.className = 'partner-card';
+    // Skeleton only, same reasoning as createDealCard — deal text is
+    // set via .textContent below, not interpolated into the HTML
     el.innerHTML = `
         <span class="partner-flag">★ Featured</span>
-        <div class="partner-emoji">${deal.icon || '🎁'}</div>
-        <h3 class="partner-title">${deal.deal}</h3>
-        ${deal.details ? `<p class="partner-details">${deal.details}</p>` : ''}
+        <div class="partner-emoji"></div>
+        <h3 class="partner-title"></h3>
+        ${deal.details ? `<p class="partner-details"></p>` : ''}
         <div class="partner-foot">
             <div class="partner-biz">
                 <span class="partner-biz-text">
-                    <strong>${deal.business || ''}</strong>
-                    ${deal.location ? `<small><span class="meta-dot"></span>${deal.location}</small>` : ''}
+                    <strong></strong>
+                    ${deal.location ? `<small><span class="meta-dot"></span><span class="partner-loc-text"></span></small>` : ''}
                 </span>
             </div>
             <button class="partner-go" aria-label="View deal">${ICON_ARROW}</button>
         </div>`;
+
+    el.querySelector('.partner-emoji').textContent = deal.icon || '🎁';
+    el.querySelector('.partner-title').textContent = deal.deal || '';
+    if (deal.details) el.querySelector('.partner-details').textContent = deal.details;
+    el.querySelector('.partner-biz-text strong').textContent = deal.business || '';
+    if (deal.location) el.querySelector('.partner-loc-text').textContent = deal.location;
+
     el.addEventListener('click', () => openDealModal(deal));
     return el;
 }
@@ -813,6 +839,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = input.value.trim();
         if (!email) return;
 
+        // Honeypot — real visitors never see or fill this field, so any
+        // value here means an automated submission. Pretend it worked
+        // (don't tip off the bot) but don't actually send anything.
+        const honeypot = document.getElementById('emailHoneypot');
+        if (honeypot && honeypot.value) {
+            localStorage.setItem('mhkfinds-email-subscribed', '1');
+            hideBanner('emailBanner');
+            maybeShowInstallBanner();
+            return;
+        }
+
         const btn = e.target.querySelector('button[type="submit"]');
         btn.disabled = true;
         btn.textContent = 'Saving...';
@@ -825,7 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({ email, website: honeypot ? honeypot.value : '' })
             });
         } catch (err) {
             console.warn('Email signup request failed:', err);

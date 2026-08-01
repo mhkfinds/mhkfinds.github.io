@@ -284,6 +284,16 @@ main {
     box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.35);
 }
 
+/* Honeypot — invisible to real visitors, not just display:none (some
+   bots skip display:none fields on purpose) */
+.hp-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
 /* ========== iOS INSTALL TOOLTIP ========== */
 .ios-tooltip {
     position: fixed;
