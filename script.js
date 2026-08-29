@@ -773,30 +773,13 @@ function initSearchOverlay() {
     });
 }
 
-// ========== PWA: SERVICE WORKER + INSTALL PROMPT ==========
+// ========== PWA: SERVICE WORKER ==========
 
 // Register service worker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
         .catch(err => console.warn('SW registration failed:', err));
 }
-
-let deferredInstallPrompt = null;
-const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-    || window.navigator.standalone === true;
-
-// Capture Android install prompt
-window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-});
-
-// Hide banner after install
-window.addEventListener('appinstalled', () => {
-    deferredInstallPrompt = null;
-    hideBanner('installBanner');
-});
 
 function hideBanner(id) {
     const b = document.getElementById(id);
@@ -814,23 +797,10 @@ function showBanner(id) {
 // to skim before the list is ever actually used.
 const EMAIL_SIGNUP_URL = 'https://script.google.com/macros/s/AKfycbzHfW-K-ZA8RSybcgmoOLF3aR6CNCOF-f4mxTonhHHRJS7jHItPs9q0sYuEPQIdD4jAHA/exec';
 
-// Only one top banner shows at a time. Email capture goes first (owning
-// an email list matters more here than PWA installs); once that's been
-// handled — subscribed or dismissed — the install banner gets its turn.
-function maybeShowInstallBanner() {
-    if (isStandalone || localStorage.getItem('pwaInstallDismissed')) return;
-    showBanner('installBanner');
-}
-
 document.addEventListener('DOMContentLoaded', () => {
-    const emailHandled = localStorage.getItem('mhkfinds-email-subscribed')
-        || localStorage.getItem('mhkfinds-email-dismissed');
-
-    if (!emailHandled) {
-        showBanner('emailBanner');
-    } else {
-        maybeShowInstallBanner();
-    }
+    // Always show the email capture banner — no longer gated on a
+    // previous subscribe/dismiss, it shows on every visit
+    showBanner('emailBanner');
 
     // Email capture submit
     document.getElementById('emailCaptureForm')?.addEventListener('submit', async e => {
@@ -844,9 +814,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // (don't tip off the bot) but don't actually send anything.
         const honeypot = document.getElementById('emailHoneypot');
         if (honeypot && honeypot.value) {
-            localStorage.setItem('mhkfinds-email-subscribed', '1');
             hideBanner('emailBanner');
-            maybeShowInstallBanner();
             return;
         }
 
@@ -868,44 +836,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('Email signup request failed:', err);
         }
 
-        localStorage.setItem('mhkfinds-email-subscribed', '1');
         hideBanner('emailBanner');
-        maybeShowInstallBanner();
         if (typeof gtag !== 'undefined') gtag('event', 'email_signup');
     });
 
     document.getElementById('emailDismiss')?.addEventListener('click', () => {
-        localStorage.setItem('mhkfinds-email-dismissed', '1');
         hideBanner('emailBanner');
-        maybeShowInstallBanner();
-    });
-
-    // Install button click
-    document.getElementById('installBtn')?.addEventListener('click', async () => {
-        if (deferredInstallPrompt) {
-            // Android: trigger native prompt
-            deferredInstallPrompt.prompt();
-            const { outcome } = await deferredInstallPrompt.userChoice;
-            deferredInstallPrompt = null;
-            hideBanner('installBanner');
-        } else if (isIOS) {
-            // iOS: show step-by-step tooltip
-            document.getElementById('iosTooltip').style.display = 'block';
-        } else {
-            // Desktop / other: open browser menu hint
-            alert('To install: open your browser menu and choose "Install app" or "Add to Home Screen".');
-        }
-    });
-
-    // Dismiss banner
-    document.getElementById('installDismiss')?.addEventListener('click', () => {
-        hideBanner('installBanner');
-        localStorage.setItem('pwaInstallDismissed', '1');
-    });
-
-    // Close iOS tooltip
-    document.getElementById('iosTooltipClose')?.addEventListener('click', () => {
-        document.getElementById('iosTooltip').style.display = 'none';
     });
 });
 
