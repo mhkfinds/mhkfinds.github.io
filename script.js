@@ -20,6 +20,7 @@ let allDealsAnyDay = []; // includes deals not showing today, for share links
 const ICON_HEART = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.6Z"/></svg>';
 const ICON_SHARE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>';
 const ICON_ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const ICON_GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18Z"/></svg>';
 
 // Replace this URL with YOUR published Google Sheets CSV URL
 const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT3QxDHqv4FuFfW2ygOAAPGco5WW-OJzAKYbdIQQ8lHguKr4e8yLnf7rNqHafiljTuW8h6-9-AWOCht/pub?gid=0&single=true&output=csv';
@@ -155,6 +156,21 @@ function parseCSVRows(text) {
     return rows;
 }
 
+// Add https:// to a bare domain (e.g. "chensmanhattan.com") so it's a
+// valid href instead of a relative link on the site itself
+function normalizeUrl(url) {
+    return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
+// The Website column is the source of truth; for older rows that predate
+// it, fall back to pulling a URL out of the free-text Notes column so
+// nothing has to be manually backfilled
+function resolveWebsite(websiteStr, notesStr) {
+    if (websiteStr) return normalizeUrl(websiteStr);
+    const match = notesStr.match(/(?:https?:\/\/|www\.)\S+|\b[a-z0-9-]+\.(?:com|org|net|edu|gov|co|io|biz|us)(?:\/\S*)?\b/i);
+    return match ? normalizeUrl(match[0]) : '';
+}
+
 // Parse CSV text into array of deal objects
 function parseCSV(csvText) {
     const rows = parseCSVRows(csvText.trim());
@@ -222,6 +238,7 @@ function parseCSV(csvText) {
             eventDate: eventDateStr,
             featured: ['yes', 'true', '1', 'featured', 'partner'].includes(featuredStr),
             id: values[10]?.trim() || '', // stable ID from the sheet's ID column
+            website: resolveWebsite(values[14]?.trim() || '', values[13]?.trim() || ''),
             showsToday
         });
     }
@@ -306,6 +323,23 @@ function createDealCard(deal) {
 
     const buttons = card.querySelector('.card-buttons');
 
+    // Website link (only when the sheet has one) — a real <a href>, not a
+    // JS click handler, so it reads as a genuine link to search engines
+    if (deal.website) {
+        const webLink = document.createElement('a');
+        webLink.className = 'card-website-btn';
+        webLink.href = deal.website;
+        webLink.target = '_blank';
+        webLink.rel = 'noopener';
+        webLink.setAttribute('aria-label', 'Visit website');
+        webLink.innerHTML = ICON_GLOBE;
+        webLink.addEventListener('click', e => {
+            e.stopPropagation();
+            trackDeal('visit_website', deal);
+        });
+        buttons.appendChild(webLink);
+    }
+
     // Share button
     const shareBtn = document.createElement('button');
     shareBtn.className = 'card-share-btn';
@@ -355,7 +389,9 @@ function createPartnerCard(deal) {
                     ${deal.location ? `<small><span class="meta-dot"></span><span class="partner-loc-text"></span></small>` : ''}
                 </span>
             </div>
-            <button class="partner-go" aria-label="View deal">${ICON_ARROW}</button>
+            <div class="partner-actions">
+                <button class="partner-go" aria-label="View deal">${ICON_ARROW}</button>
+            </div>
         </div>`;
 
     el.querySelector('.partner-emoji').textContent = deal.icon || '🎁';
@@ -363,6 +399,23 @@ function createPartnerCard(deal) {
     if (deal.details) el.querySelector('.partner-details').textContent = deal.details;
     el.querySelector('.partner-biz-text strong').textContent = deal.business || '';
     if (deal.location) el.querySelector('.partner-loc-text').textContent = deal.location;
+
+    // Website link — a separate button from the arrow, which still just
+    // opens the details popup like every other card
+    if (deal.website) {
+        const webLink = document.createElement('a');
+        webLink.className = 'partner-website-btn';
+        webLink.href = deal.website;
+        webLink.target = '_blank';
+        webLink.rel = 'noopener';
+        webLink.setAttribute('aria-label', 'Visit website');
+        webLink.innerHTML = ICON_GLOBE;
+        webLink.addEventListener('click', e => {
+            e.stopPropagation();
+            trackDeal('visit_website', deal);
+        });
+        el.querySelector('.partner-actions').prepend(webLink);
+    }
 
     el.addEventListener('click', () => openDealModal(deal));
     return el;
@@ -1024,6 +1077,21 @@ function openDealModal(deal) {
         directionsBtn.style.display = 'flex';
     } else {
         directionsBtn.style.display = 'none';
+    }
+
+    // Website link — a real <a href> set per-deal, hidden when there's none
+    const websiteBtn = document.getElementById('modalWebsiteBtn');
+    if (websiteBtn) {
+        if (deal.website) {
+            websiteBtn.href = deal.website;
+            websiteBtn.onclick = (e) => {
+                e.stopPropagation();
+                trackDeal('visit_website', deal);
+            };
+            websiteBtn.style.display = 'flex';
+        } else {
+            websiteBtn.style.display = 'none';
+        }
     }
 
     // Share button
